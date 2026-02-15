@@ -1,0 +1,116 @@
+/* ==========================================================================
+   Digital Carbon Auditor - Design tokens
+   Sustainability-focused: natural greens, soft neutrals, clarity.
+   Use semantic tokens in components; edit palette here for global changes.
+   ========================================================================== */
+
+:root {
+  /* -------------------------------------------------------------------------
+     COLOR PALETTE (raw values - single source of truth)
+     ------------------------------------------------------------------------- */
+  --palette-forest: #4a7c59;           /* Primary green */
+  --palette-forest-dark: #3d6b4a;      /* Primary hover/pressed */
+  --palette-mint: #4a9b6a;             /* Accent / success green */
+  --palette-mint-dark: #3d8559;        /* Accent hover */
+  --palette-mint-rgb: 74, 155, 106;
+  --palette-sage: #a8c4b0;             /* Surface / section separation */
+  --palette-sage-rgb: 168, 196, 176;
+  --palette-ink: #3d5249;              /* Headings, body text */
+  --palette-ink-mid: #5a6b62;          /* Secondary text */
+  --palette-ink-light: #6e7e76;        /* Muted, hints */
+  --palette-ink-rgb: 61, 82, 73;
+  --palette-page: #f2f7ed;             /* Page background */
+  --palette-page-soft: #e8f0e3;        /* Soft containers (e.g. Select Folder) */
+  --palette-paper: #ffffff;            /* Cards, elevated surfaces */
+  --palette-error: #b91c1c;
+  --palette-error-bg: #fef2f2;
+
+  /* -------------------------------------------------------------------------
+     SEMANTIC COLOR TOKENS (use these in components)
+     ------------------------------------------------------------------------- */
+  /* Actions & emphasis */
+  --color-primary: var(--palette-forest);
+  --color-primary-hover: var(--palette-forest-dark);
+  --color-action: var(--color-primary);           /* Alias: primary CTA */
+  --color-action-hover: var(--color-primary-hover);
+
+  /* Text */
+  --color-heading: var(--palette-ink);
+  --color-text: var(--palette-ink);
+  --color-text-secondary: var(--palette-ink-mid);
+  --color-text-muted: var(--palette-ink-light);
+
+  /* Accent, success, progress */
+  --color-accent: var(--palette-mint);
+  --color-accent-hover: var(--palette-mint-dark);
+  --color-success: var(--palette-mint);
+  --color-success-bg: rgba(var(--palette-mint-rgb), 0.14);
+
+  /* Surfaces & grouping */
+  --color-surface: var(--palette-sage);
+  --color-surface-soft: rgba(var(--palette-sage-rgb), 0.35);
+  --color-bg: var(--palette-page);
+  --color-bg-soft: var(--palette-page-soft);
+  --color-bg-elevated: var(--palette-paper);
+
+  /* Borders */
+  --color-border: rgba(var(--palette-ink-rgb), 0.14);
+  --color-border-strong: rgba(var(--palette-ink-rgb), 0.22);
+
+  /* Feedback */
+  --color-error: var(--palette-error);
+  --color-error-bg: var(--palette-error-bg);
+
+  /* -------------------------------------------------------------------------
+     TYPOGRAPHY
+     ------------------------------------------------------------------------- */
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-base: 15px;
+  --text-md: 17px;
+  --text-lg: 22px;
+  --text-xl: 26px;
+  --leading-tight: 1.35;
+  --leading-normal: 1.55;
+  --leading-relaxed: 1.65;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* -------------------------------------------------------------------------
+     SPACING
+     ------------------------------------------------------------------------- */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+
+  /* -------------------------------------------------------------------------
+     RADIUS & SHADOW
+     ------------------------------------------------------------------------- */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --shadow-sm: 0 1px 3px rgba(var(--palette-ink-rgb), 0.06);
+  --shadow-md: 0 2px 8px rgba(var(--palette-ink-rgb), 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Focus visible for accessibility - use primary for discoverability */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}

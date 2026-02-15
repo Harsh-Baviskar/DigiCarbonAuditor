@@ -1,0 +1,144 @@
+.section {
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.heading {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  font-size: var(--text-md);
+  font-weight: 600;
+  line-height: var(--leading-tight);
+  color: var(--color-heading);
+}
+
+.toggleButton {
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-accent);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.toggleButton:hover {
+  color: var(--color-accent-hover);
+}
+
+.empty {
+  margin: 0;
+  padding: var(--space-lg);
+  text-align: center;
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--color-text-muted);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.group {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+/* Light surface for grouped rows; fresh, not dull */
+.groupHeader {
+  padding: var(--space-md);
+  background: var(--color-surface-soft);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.groupMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.hash {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  color: var(--color-text-secondary);
+  word-break: break-all;
+}
+
+.size {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.duplicateCount {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.pathsContainer {
+  padding: var(--space-md);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.pathList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pathItem {
+  padding: var(--space-xs) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.pathItem:last-child {
+  border-bottom: none;
+}
+
+.path {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  color: var(--color-text-secondary);
+  word-break: break-all;
+  display: block;
+}
+
+/* Fresh green accent for expand - discoverable */
+.expandButton {
+  margin-top: var(--space-sm);
+  padding: var(--space-xs) 0;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-accent);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: color 0.15s ease;
+}
+
+.expandButton:hover {
+  color: var(--color-accent-hover);
+  text-decoration: underline;
+}

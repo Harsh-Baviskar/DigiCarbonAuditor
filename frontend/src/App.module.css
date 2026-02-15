@@ -1,0 +1,30 @@
+/* Logical grouping and spacing. High-level → insight → detail flow. */
+.scanSection {
+  margin-bottom: 0;
+}
+
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.summarySection {
+  margin-bottom: 0;
+}
+
+/* Top Contributors + Suggested Actions side-by-side on wider screens */
+.insightGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: var(--space-lg);
+}
+
+.contributorsSection,
+.actionsSection {
+  margin-bottom: 0;
+}
+
+.duplicatesSection {
+  margin-bottom: 0;
+}

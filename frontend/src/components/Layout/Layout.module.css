@@ -8,20 +8,35 @@
 .header {
   margin-bottom: var(--space-xl);
   padding-bottom: var(--space-lg);
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 2px solid var(--color-surface-soft);
 }
 
+.headerTop {
+  display: flex;
+  gap: var(--space-xl);
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.headerTop > div:first-child {
+  flex: 1;
+  min-width: 240px;
+}
+
+/* Page title - proportional to base for clear hierarchy */
 .title {
   margin: 0;
-  font-size: 24px;
+  font-size: var(--text-xl);
   font-weight: 600;
-  color: var(--color-text);
+  line-height: var(--leading-tight);
+  color: var(--color-heading);
   letter-spacing: -0.02em;
 }
 
 .subtitle {
   margin: var(--space-xs) 0 0;
-  font-size: 14px;
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
   color: var(--color-text-secondary);
 }
 
