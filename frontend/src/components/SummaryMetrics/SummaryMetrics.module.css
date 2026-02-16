@@ -34,7 +34,7 @@
 
 .card:hover {
   border-color: var(--color-surface);
-  background: rgba(168, 196, 176, 0.45);
+  background: var(--color-surface);
 }
 
 /* Key metrics - larger for scanability */

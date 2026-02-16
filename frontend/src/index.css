@@ -5,58 +5,102 @@
    ========================================================================== */
 
 :root {
+  /* =========================================================================
+     REFINED COLOR PALETTE - Combining two sustainability-focused palettes
+     Fresh, calm, professional - guides attention without decoration
+     ========================================================================= */
+  
   /* -------------------------------------------------------------------------
-     COLOR PALETTE (raw values - single source of truth)
+     CORE PALETTE (raw values - single source of truth)
+     Thoughtfully selected from both palettes for clear role assignment
      ------------------------------------------------------------------------- */
-  --palette-forest: #4a7c59;           /* Primary green */
-  --palette-forest-dark: #3d6b4a;      /* Primary hover/pressed */
-  --palette-mint: #4a9b6a;             /* Accent / success green */
-  --palette-mint-dark: #3d8559;        /* Accent hover */
-  --palette-mint-rgb: 74, 155, 106;
-  --palette-sage: #a8c4b0;             /* Surface / section separation */
-  --palette-sage-rgb: 168, 196, 176;
-  --palette-ink: #3d5249;              /* Headings, body text */
-  --palette-ink-mid: #5a6b62;          /* Secondary text */
-  --palette-ink-light: #6e7e76;        /* Muted, hints */
-  --palette-ink-rgb: 61, 82, 73;
-  --palette-page: #f2f7ed;             /* Page background */
-  --palette-page-soft: #e8f0e3;        /* Soft containers (e.g. Select Folder) */
-  --palette-paper: #ffffff;            /* Cards, elevated surfaces */
-  --palette-error: #b91c1c;
-  --palette-error-bg: #fef2f2;
+  
+  /* Primary - Actions & CTAs */
+  --palette-primary: #437057;          /* Medium forest green - trustworthy, visible */
+  --palette-primary-dark: #2F5249;     /* Dark forest teal - hover states, emphasis */
+  --palette-primary-rgb: 67, 112, 87;
+  
+  /* Secondary - Supporting elements */
+  --palette-secondary: #5C8374;        /* Medium sage - surfaces, secondary actions */
+  --palette-secondary-light: #9EC8B9;  /* Light sage - soft backgrounds, borders */
+  --palette-secondary-rgb: 92, 131, 116;
+  
+  /* Accent - Highlights & Success */
+  --palette-accent: #97B067;           /* Lime sage - positive actions, growth */
+  --palette-accent-light: #b4c98a;     /* Tinted accent - subtle highlights */
+  --palette-accent-rgb: 151, 176, 103;
+  
+  /* Alert/Highlight - Use sparingly */
+  --palette-highlight: #E3DE61;        /* Soft yellow-green - important items only */
+  --palette-highlight-rgb: 227, 222, 97;
+  
+  /* Dark elements - Headers, footers, deep contrast */
+  --palette-deep: #4a6b33;             /* Dark teal - professional headers */
+  --palette-deep-darker: #092635;      /* Very dark teal - maximum contrast */
+  --palette-deep-rgb: 27, 66, 66;
+  
+  /* Text - High readability hierarchy */
+  --palette-text-primary: #2F5249;     /* Dark forest - headings, body text */
+  --palette-text-secondary: #437057;   /* Medium forest - secondary text */
+  --palette-text-muted: #5C8374;       /* Medium sage - hints, disabled */
+  --palette-text-rgb: 47, 82, 73;
+  
+  /* Neutral surfaces */
+  --palette-surface-light: #f0f7f4;    /* Very light sage - page background */
+  --palette-surface-soft: #e6f2ed;     /* Light sage tint - soft containers */
+  --palette-surface-sage: #d4e8df;     /* Sage tint - section separation */
+  --palette-paper: #ffffff;            /* Pure white - cards, elevated surfaces */
+  
+  /* Feedback - Errors and warnings */
+  --palette-error: #b91c1c;            /* Red - errors */
+  --palette-error-bg: #fef2f2;         /* Light red - error backgrounds */
 
   /* -------------------------------------------------------------------------
      SEMANTIC COLOR TOKENS (use these in components)
+     Applied consistently for clear visual hierarchy
      ------------------------------------------------------------------------- */
-  /* Actions & emphasis */
-  --color-primary: var(--palette-forest);
-  --color-primary-hover: var(--palette-forest-dark);
-  --color-action: var(--color-primary);           /* Alias: primary CTA */
+  
+  /* Actions & emphasis - Primary forest green for trust */
+  --color-primary: var(--palette-primary);
+  --color-primary-hover: var(--palette-primary-dark);
+  --color-action: var(--color-primary);
   --color-action-hover: var(--color-primary-hover);
-
-  /* Text */
-  --color-heading: var(--palette-ink);
-  --color-text: var(--palette-ink);
-  --color-text-secondary: var(--palette-ink-mid);
-  --color-text-muted: var(--palette-ink-light);
-
-  /* Accent, success, progress */
-  --color-accent: var(--palette-mint);
-  --color-accent-hover: var(--palette-mint-dark);
-  --color-success: var(--palette-mint);
-  --color-success-bg: rgba(var(--palette-mint-rgb), 0.14);
-
-  /* Surfaces & grouping */
-  --color-surface: var(--palette-sage);
-  --color-surface-soft: rgba(var(--palette-sage-rgb), 0.35);
-  --color-bg: var(--palette-page);
-  --color-bg-soft: var(--palette-page-soft);
+  
+  /* Text hierarchy - Dark to muted for readability */
+  --color-heading: var(--palette-text-primary);
+  --color-text: var(--palette-text-primary);
+  --color-text-secondary: var(--palette-text-secondary);
+  --color-text-muted: var(--palette-text-muted);
+  
+  /* Accent & success - Fresh lime sage for positive actions */
+  --color-accent: var(--palette-accent);
+  --color-accent-hover: var(--palette-primary);
+  --color-success: var(--palette-accent);
+  --color-success-bg: rgba(var(--palette-accent-rgb), 0.12);
+  
+  /* Highlight - Soft yellow for important items (use sparingly) */
+  --color-highlight: var(--palette-highlight);
+  --color-highlight-bg: rgba(var(--palette-highlight-rgb), 0.15);
+  
+  /* Surfaces & grouping - Light sage for calm, clean backgrounds */
+  --color-surface: var(--palette-surface-sage);
+  --color-surface-soft: var(--palette-surface-soft);
+  --color-bg: var(--palette-surface-light);
+  --color-bg-soft: var(--palette-surface-soft);
   --color-bg-elevated: var(--palette-paper);
-
-  /* Borders */
-  --color-border: rgba(var(--palette-ink-rgb), 0.14);
-  --color-border-strong: rgba(var(--palette-ink-rgb), 0.22);
-
+  
+  /* Secondary elements */
+  --color-secondary: var(--palette-secondary);
+  --color-secondary-light: var(--palette-secondary-light);
+  
+  /* Dark backgrounds - Professional header/footer */
+  --color-deep: var(--palette-deep);
+  --color-deep-darker: var(--palette-deep-darker);
+  
+  /* Borders - Subtle separation */
+  --color-border: rgba(var(--palette-text-rgb), 0.12);
+  --color-border-strong: rgba(var(--palette-text-rgb), 0.20);
+  
   /* Feedback */
   --color-error: var(--palette-error);
   --color-error-bg: var(--palette-error-bg);
@@ -64,12 +108,12 @@
   /* -------------------------------------------------------------------------
      TYPOGRAPHY
      ------------------------------------------------------------------------- */
-  --text-xs: 12px;
-  --text-sm: 13px;
-  --text-base: 15px;
-  --text-md: 17px;
-  --text-lg: 22px;
-  --text-xl: 26px;
+  --text-xs: 13px;
+  --text-sm: 14px;
+  --text-base: 18px;
+  --text-md: 18px;
+  --text-lg: 24px;
+  --text-xl: 38px;
   --leading-tight: 1.35;
   --leading-normal: 1.55;
   --leading-relaxed: 1.65;
@@ -82,7 +126,7 @@
   --space-xs: 4px;
   --space-sm: 8px;
   --space-md: 16px;
-  --space-lg: 24px;
+  --space-lg: 20px;
   --space-xl: 32px;
 
   /* -------------------------------------------------------------------------

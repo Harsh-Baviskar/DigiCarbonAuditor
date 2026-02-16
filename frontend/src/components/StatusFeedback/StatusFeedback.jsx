@@ -25,13 +25,7 @@ export default function StatusFeedback({
   }, [status]);
 
   if (!status || status === 'idle') {
-    return (
-      <section className={styles.section} aria-live="polite">
-        <p className={styles.message}>
-          Select a folder or enter a path, then click Start Scan to analyze duplicates and carbon impact.
-        </p>
-      </section>
-    );
+    return null;
   }
 
   if (status === 'loading') {

@@ -1,19 +1,18 @@
-/* Light, airy surface for value prop - clean and breathable */
+/* Sidebar style - sage/green background matching the image */
 .aside {
   flex-shrink: 0;
   width: 100%;
-  max-width: 280px;
-  padding: var(--space-md) var(--space-lg);
-  background: var(--color-surface-soft);
+  padding: var(--space-lg);
+  background: linear-gradient(#367756, #195158);
   border: 1px solid var(--color-surface);
   border-radius: var(--radius-md);
 }
 
 .heading {
   margin: 0 0 var(--space-sm);
-  font-size: var(--text-sm);
+  font-size: var(--text-md) bold;
   font-weight: 600;
-  color: var(--color-heading);
+  color: white;
 }
 
 .list {
@@ -39,9 +38,9 @@
 .title {
   font-size: var(--text-sm);
   font-weight: 600;
-  color: var(--color-heading);
+  color: white;
 }
 
 .description {
-  color: var(--color-text-secondary);
+  color: rgb(249, 250, 174);
 }

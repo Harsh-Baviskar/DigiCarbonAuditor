@@ -1,0 +1,99 @@
+/**
+ * Header styles - Professional, minimal, visually distinct
+ * Follows standard web application patterns
+ */
+
+.header {
+  /* Visually distinct from page content - sustainability-themed background image */
+  /* Background image set via inline style for Vite compatibility */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: var(--palette-paper);
+  
+  /* Subtle shadow for depth */
+  box-shadow: 0 2px 8px rgba(var(--palette-deep-rgb), 0.2);
+  
+  /* Persistent at top */
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  
+  padding: 55px 0;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+}
+
+.branding {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+/* Trust badges wrapper - positioned below header text */
+.badgesWrapper {
+  margin-top: var(--space-md);
+}
+
+/* Logo styling - minimal wrapper */
+.logo {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon {
+  width: 60px;
+  height: 60px;
+  color: #0d7e40; /* Fresh green accent color */
+}
+
+/* Application name - primary heading */
+.appName {
+  margin: 0;
+  font-size: var(--text-xl);
+  font-weight: 700;
+  line-height: var(--leading-tight);
+  color: var(--palette-paper);
+  letter-spacing: -0.02em;
+}
+
+/* Short tagline */
+.tagline {
+  margin: var(--space-xs) 0 0;
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 400;
+}
+
+/* Responsive design */
+@media (max-width: 640px) {
+  .header {
+    padding: var(--space-md) 0;
+  }
+
+  .logo {
+    width: 48px;
+    height: 48px;
+  }
+
+  .icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .appName {
+    font-size: var(--text-lg);
+  }
+
+  .tagline {
+    font-size: var(--text-sm);
+  }
+}

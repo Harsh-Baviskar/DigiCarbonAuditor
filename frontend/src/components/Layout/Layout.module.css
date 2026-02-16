@@ -1,49 +1,95 @@
-.wrapper {
+/**
+ * Professional page layout following standard web conventions
+ * Two-column layout: Sidebar (why) + Main content area
+ * Responsive, accessible, semantic structure
+ */
+
+/* Full-height wrapper - flexbox ensures footer stays at bottom */
+.pageWrapper {
   min-height: 100vh;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: var(--space-xl) var(--space-lg);
-}
-
-.header {
-  margin-bottom: var(--space-xl);
-  padding-bottom: var(--space-lg);
-  border-bottom: 2px solid var(--color-surface-soft);
-}
-
-.headerTop {
-  display: flex;
-  gap: var(--space-xl);
-  flex-wrap: wrap;
-  align-items: flex-start;
-}
-
-.headerTop > div:first-child {
-  flex: 1;
-  min-width: 240px;
-}
-
-/* Page title - proportional to base for clear hierarchy */
-.title {
-  margin: 0;
-  font-size: var(--text-xl);
-  font-weight: 600;
-  line-height: var(--leading-tight);
-  color: var(--color-heading);
-  letter-spacing: -0.02em;
-}
-
-.subtitle {
-  margin: var(--space-xs) 0 0;
-  font-size: var(--text-base);
-  line-height: var(--leading-normal);
-  color: var(--color-text-secondary);
-}
-
-.main {
   display: flex;
   flex-direction: column;
-  gap: var(--space-xl);
+  background: var(--color-bg);
 }
 
-/* Section grouping: clear visual hierarchy between scan, status, and results */
+/* Reusable container for consistent max-width and horizontal padding */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+  width: 100%;
+}
+
+/* Content wrapper - contains the two-column layout */
+.contentWrapper {
+  flex: 1;
+  padding: var(--space-xl) 0;
+}
+
+/* Two-column layout: sidebar + main content */
+.twoColumnLayout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: var(--space-xl);
+  align-items: start;
+}
+
+/* Left sidebar - "Why this matters" */
+.sidebar {
+  position: sticky;
+  top: calc(var(--space-xl) + 88px); /* Offset by header height */
+}
+
+/* Right column - trust badges + main workflow */
+.mainColumn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  min-width: 0; /* Prevents grid overflow */
+}
+
+/* Trust badges wrapper at top of main content */
+.trustBadgesWrapper {
+  margin-bottom: var(--space-md);
+}
+
+/* Footer - minimal and unobtrusive */
+.footer {
+  background: var(--color-bg-soft);
+  border-top: 1px solid var(--color-border);
+  padding: var(--space-lg) 0;
+  margin-top: auto;
+}
+
+.footerText {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  text-align: center;
+  line-height: var(--leading-normal);
+}
+
+/* Responsive: stack sidebar below on smaller screens */
+@media (max-width: 968px) {
+  .twoColumnLayout {
+    grid-template-columns: 1fr;
+    gap: var(--space-lg);
+  }
+
+  .sidebar {
+    position: static;
+    max-width: 100%;
+  }
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .contentWrapper,
+  .footer {
+    padding: var(--space-md) 0;
+  }
+
+  .twoColumnLayout {
+    gap: var(--space-md);
+  }
+}

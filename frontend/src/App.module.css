@@ -1,12 +1,13 @@
 /* Logical grouping and spacing. High-level → insight → detail flow. */
 .scanSection {
-  margin-bottom: 0;
+  margin-bottom: var(--space-lg);
 }
 
 .results {
   display: flex;
   flex-direction: column;
   gap: var(--space-xl);
+  margin-top: var(--space-xl);
 }
 
 .summarySection {
