@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Diagnostic Test</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+    .test { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+    .success { background: #d4edda; border-color: #28a745; }
+    .error { background: #f8d7da; border-color: #dc3545; }
+    .loading { background: #d1ecf1; border-color: #17a2b8; }
+    pre { background: #f5f5f5; padding: 10px; overflow-x: auto; }
+    button { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; border-radius: 3px; }
+    button:hover { background: #0056b3; }
+    input { padding: 8px; width: 100%; margin: 5px 0; }
+  </style>
+</head>
+<body>
+  <h1>🧪 Digital Carbon Auditor - API Diagnostic</h1>
+  
+  <div class="test">
+    <h2>Test 1: Backend Connection</h2>
+    <p>Storage Size (GB): <input type="number" id="storageSize" value="100" min="1"></p>
+    <p>Region: 
+      <select id="region">
+        <option value="IN-WE">India West (447 gCO2/kWh)</option>
+        <option value="FR">France (35 gCO2/kWh)</option>
+        <option value="US-CAL-CISO">California (177 gCO2/kWh)</option>
+      </select>
+    </p>
+    <button onclick="testBackend()">Test Backend /calculate</button>
+    <div id="result1"></div>
+  </div>
+
+  <script>
+    async function testBackend() {
+      const storageGB = parseFloat(document.getElementById('storageSize').value);
+      const region = document.getElementById('region').value;
+      const storageTB = storageGB / 1024;
+      
+      const result = document.getElementById('result1');
+      result.innerHTML = '<div class="loading"><p>Testing...</p></div>';
+      
+      try {
+        const response = await fetch('http://localhost:5000/calculate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            storage_tb: storageTB,
+            region: region
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        const success = data.energy_kwh_per_year > 0 && data.carbon_kg_per_year > 0;
+        
+        result.innerHTML = `
+          <div class="${success ? 'success' : 'error'}">
+            <h3>✅ Backend Responded</h3>
+            <pre>${JSON.stringify(data, null, 2)}</pre>
+            <h4>Extracted Values:</h4>
+            <ul>
+              <li><strong>Storage:</strong> ${data.storage_tb} TB (${(data.storage_tb * 1024).toFixed(2)} GB)</li>
+              <li><strong>Energy:</strong> ${data.energy_kwh_per_year.toFixed(2)} kWh/year</li>
+              <li><strong>Carbon:</strong> ${data.carbon_kg_per_year.toFixed(2)} kg CO₂/year</li>
+              <li><strong>Cost:</strong> $${data.carbon_cost_estimate.toFixed(2)}/year</li>
+            </ul>
+            <p><strong>Status:</strong> ${success ? '✅ All values are NON-ZERO (GOOD!)' : '❌ Some values are zero'}</p>
+          </div>
+        `;
+      } catch (error) {
+        result.innerHTML = `
+          <div class="error">
+            <h3>❌ Backend Error</h3>
+            <p><strong>Error:</strong> ${error.message}</p>
+            <p><strong>Possible causes:</strong></p>
+            <ul>
+              <li>Backend server not running on http://localhost:5000</li>
+              <li>CORS error (check browser console)</li>
+              <li>Backend crashed or not responding</li>
+            </ul>
+            <p><strong>Solution:</strong> Make sure backend is running with: <code>cd backend/app && python app.py</code></p>
+          </div>
+        `;
+      }
+    }
+
+    // Test on page load
+    window.addEventListener('load', () => {
+      console.log('Page loaded. Click "Test Backend" button to verify connection.');
+    });
+  </script>
+</body>
+</html>
