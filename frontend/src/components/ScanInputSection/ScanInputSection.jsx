@@ -65,12 +65,13 @@ export default function ScanInputSection({ onScan, isScanning }) {
     // Check if this looks like a folder selection (contains size and file count)
     const folderMatch = trimmed.match(/^(.+?)\s*\(\s*([\d.]+)\s*GB,\s*(\d+)\s*files?\s*\)$/i);
     if (folderMatch) {
-      // Extract folder name from the display string
+      // Extract folder name and calculated size from the display string
       const folderName = folderMatch[1].trim();
+      const sizeGB = parseFloat(folderMatch[2]);
       const fileCount = parseInt(folderMatch[3]);
-      console.log(`Folder selected: ${folderName} with ${fileCount} accessible files`);
-      // Pass folder name for backend to generate realistic estimates
-      onScan(folderName, region, fileCount);
+      console.log(`Folder selected: ${folderName}, ${sizeGB} GB, ${fileCount} files`);
+      // Pass the actual calculated size (in GB) so backend doesn't need to guess
+      onScan(sizeGB.toString(), region, fileCount);
     } else {
       // Manual input - user should enter size in GB (no file count available)
       const sizeNum = parseFloat(trimmed);

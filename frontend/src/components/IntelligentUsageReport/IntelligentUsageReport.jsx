@@ -78,7 +78,7 @@ export default function IntelligentUsageReport({ report }) {
             <div className={styles.statsGrid}>
 
                 {/* Circular Chart: Cold Data Ratio */}
-                <div className={styles.chartCard} role="button" tabIndex={0}>
+                <div className={styles.chartCard}>
                     <h4 className={styles.chartTitle}>Cold Data Ratio</h4>
                     <div
                         className={styles.circularChart}
@@ -92,7 +92,7 @@ export default function IntelligentUsageReport({ report }) {
                 </div>
 
                 {/* NEW: Storage Health/Efficiency Gauge */}
-                <div className={styles.chartCard} role="button" tabIndex={0}>
+                <div className={styles.chartCard}>
                     <h4 className={styles.chartTitle}>Storage Efficiency</h4>
                     <div className={styles.efficiencyGauge}>
                         <div
@@ -103,13 +103,13 @@ export default function IntelligentUsageReport({ report }) {
                             <span className={styles.efficiencyValue}>{efficiencyScore}</span>
                         </div>
                     </div>
-                    <div className={styles.statDetail} style={{ border: 'none', marginTop: 0 }}>
+                    <div className={styles.statDetail}>
                         <span className={styles.percentLabel}>Based on active file usage</span>
                     </div>
                 </div>
 
                 {/* Bar Charts: File Categories - Now Full Width */}
-                <div className={`${styles.categoryCard} ${styles.fullWidth}`} role="button" tabIndex={0}>
+                <div className={`${styles.categoryCard} ${styles.fullWidth}`}>
                     <h4 className={styles.chartTitle}>File Categories</h4>
                     <ul className={styles.categoryList}>
                         {Object.entries(categoryBreakdown).map(([cat, count], index) => {
@@ -123,10 +123,7 @@ export default function IntelligentUsageReport({ report }) {
                                     <div className={styles.progressBarTrack}>
                                         <div
                                             className={styles.progressBarFill}
-                                            style={{
-                                                width: animate ? `${percentage}%` : '0%',
-                                                backgroundColor: `hsl(150, 20%, ${30 + (index * 10)}%)` // Varying shades of green
-                                            }}
+                                            style={{ width: animate ? `${percentage}%` : '0%' }}
                                         />
                                     </div>
                                 </li>
@@ -140,7 +137,7 @@ export default function IntelligentUsageReport({ report }) {
             <h3 className={styles.recommendationsTitle}>Recommended Actions</h3>
             <div className={styles.recGrid}>
                 {recommendations.map((rec, idx) => (
-                    <div key={idx} className={styles.recCard} role="button" tabIndex={0}>
+                    <div key={idx} className={styles.recCard}>
                         {/* Split text by newlines or render as single bullet if just one line */}
                         <ul className={styles.recList}>
                             {rec.split('. ').filter(Boolean).map((point, pIdx) => (

@@ -17,6 +17,7 @@ import os
 import math
 
 from app.modules.intelligent_usage.report import generate_intelligent_usage_report
+from app.storage_scanner import scan_folder
 
 app = Flask(__name__)
 CORS(app)
@@ -84,37 +85,21 @@ def calculate():
             return jsonify({"detail": "storage_tb is required in JSON body."}), 400
         
         try:
-            # Check if storage_tb is a folder name (contains letters)
-            if isinstance(storage_tb, str) and not storage_tb.replace('.', '').replace('-', '').isdigit():
-                # It's a folder name, generate realistic estimates
-                storage_tb, file_count = estimate_folder_size(storage_tb)
-                result = {
-                    "storage_tb": storage_tb,
-                    "region": region,
-                    "energy_kwh_per_year": storage_tb * 1024 * 0.02 * 0.5,
-                    "carbon_kg_per_year": storage_tb * 1024 * 0.02,
-                    "carbon_cost_estimate": storage_tb * 1024 * 0.02 * 0.05,
-                    "calculation_method": "folder_estimation",
-                    "estimated_files": file_count,
-                    "folder_name": data.get('storage_tb')
-                }
-            else:
-                # It's a numeric size
-                storage_tb = float(storage_tb)
-                if storage_tb < 0:
-                    return jsonify({"detail": "storage_tb must be >= 0."}), 400
-                
-                # Calculate carbon footprint: 0.02 kg CO2 per GB per year
-                carbon_kg_per_year = storage_tb * 1024 * 0.02  # Convert TB to GB first
-                
-                result = {
-                    "storage_tb": storage_tb,
-                    "region": region,
-                    "energy_kwh_per_year": carbon_kg_per_year * 0.5,  # Rough estimate
-                    "carbon_kg_per_year": carbon_kg_per_year,
-                    "carbon_cost_estimate": carbon_kg_per_year * 0.05,  # Rough cost estimate
-                    "calculation_method": "direct_input"
-                }
+            storage_tb = float(storage_tb)
+            if storage_tb < 0:
+                return jsonify({"detail": "storage_tb must be >= 0."}), 400
+            
+            # Calculate carbon footprint: 0.02 kg CO2 per GB per year
+            carbon_kg_per_year = storage_tb * 1024 * 0.02  # Convert TB to GB first
+            
+            result = {
+                "storage_tb": storage_tb,
+                "region": region,
+                "energy_kwh_per_year": carbon_kg_per_year * 0.5,
+                "carbon_kg_per_year": carbon_kg_per_year,
+                "carbon_cost_estimate": carbon_kg_per_year * 0.05,
+                "calculation_method": "direct_input"
+            }
             return jsonify(result)
         except ValueError:
             return jsonify({"detail": "Invalid storage_tb value."}), 400
@@ -244,34 +229,50 @@ def intelligent_usage():
         # Try to parse the path as a number (size in GB)
         try:
             size_gb = float(path)
-            # If it's a number, return mock intelligent usage data based on size
             return generate_mock_intelligent_report(size_gb, threshold_days, file_count)
         except ValueError:
-            # Check if it's a folder name/path (contains typical folder characters or is a common folder name)
-            # More lenient check: if it contains letters and looks like a path or folder name
-            path_clean = path.replace('\\', '/').replace(':', '').lower()
-            is_folder_like = (
-                any(char.isalpha() for char in path) and  # Contains letters
-                ('desktop' in path_clean or 'documents' in path_clean or 'downloads' in path_clean or
-                 'pictures' in path_clean or 'videos' in path_clean or 'music' in path_clean)  # Only common user folders
-            )
-            
-            if is_folder_like:
-                # It's a folder name/path, generate realistic estimates
-                size_tb, estimated_file_count = estimate_folder_size(path)
-                # Use provided file_count if available, otherwise use estimate
-                actual_file_count = file_count if file_count is not None else estimated_file_count
-                size_gb = size_tb * 1024
-                return generate_mock_intelligent_report(size_gb, threshold_days, actual_file_count)
-            else:
-                # If it's not a number or folder name, treat it as a file path
-                if not os.path.exists(path):
-                    return jsonify({"detail": f"Path does not exist: {path}"}), 404
-                if not os.path.isdir(path):
-                    return jsonify({"detail": f"Path is not a directory: {path}"}), 400
-                
-                report = generate_intelligent_usage_report(path, threshold_days)
-                return jsonify(report)
+            pass
+
+        # Check if it's a real filesystem path
+        if os.path.exists(path) and os.path.isdir(path):
+            # Use scan_folder for real paths
+            scan_result = scan_folder(path)
+            total_files = scan_result["file_count"]
+            size_gb = scan_result["total_bytes"] / (1024 ** 3)
+            category_breakdown = scan_result["category_breakdown"]
+
+            cold_files_ratio = min(0.3, threshold_days / 365)
+            cold_files_count = int(total_files * cold_files_ratio)
+            cold_storage_mb = (size_gb * 1024) * cold_files_ratio
+            estimated_carbon_saving_kg = (cold_storage_mb / 1024 / 1024) * 0.02 * 0.5
+
+            recommendations = []
+            if cold_files_count > total_files * 0.2:
+                recommendations.append(f"Consider archiving {cold_files_count} cold files to save approximately {estimated_carbon_saving_kg:.2f} kg CO2 per year")
+            video_size = category_breakdown.get("video", 0)
+            if video_size > scan_result["total_bytes"] * 0.1:
+                recommendations.append("Large video files detected - consider compression or cloud storage")
+            image_size = category_breakdown.get("image", 0)
+            if image_size > scan_result["total_bytes"] * 0.15:
+                recommendations.append("Many image files found - consider batch optimization")
+            if not recommendations:
+                recommendations.append("Your file organization looks good!")
+
+            return jsonify({
+                "total_files": total_files,
+                "total_storage_mb": size_gb * 1024,
+                "cold_files_count": cold_files_count,
+                "cold_storage_mb": cold_storage_mb,
+                "estimated_carbon_saving_kg": estimated_carbon_saving_kg,
+                "category_breakdown": category_breakdown,
+                "recommendations": recommendations
+            })
+        else:
+            # Fall back to mock report using estimated folder size
+            size_tb, estimated_file_count = estimate_folder_size(path)
+            actual_file_count = file_count if file_count is not None else estimated_file_count
+            size_gb = size_tb * 1024
+            return generate_mock_intelligent_report(size_gb, threshold_days, actual_file_count)
     except Exception as exc:
         return jsonify({"detail": f"Internal error: {exc}"}), 500
 
