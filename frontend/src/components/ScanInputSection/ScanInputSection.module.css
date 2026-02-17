@@ -1,4 +1,4 @@
-/* Elevated white cards on soft background - calm, predictable */
+﻿/* Elevated white cards on soft background - calm, predictable */
 .section {
   background: var(--color-bg-elevated);
   border: 1px solid var(--color-border);
@@ -166,4 +166,32 @@
   margin: 0;
   font-size: var(--text-sm);
   color: var(--color-text-muted);
+}
+
+.regionSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+
+.select {
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--text-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  background: var(--color-bg-elevated);
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(74, 124, 89, 0.15);
+}
+
+.select:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }

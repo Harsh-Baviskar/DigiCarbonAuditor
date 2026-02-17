@@ -1,4 +1,4 @@
-import { formatCarbonImpact } from '../../utils/formatters';
+﻿import { formatCarbonImpact } from '../../utils/formatters';
 import InfoTooltip from '../InfoTooltip/InfoTooltip';
 import styles from './SuggestedActions.module.css';
 

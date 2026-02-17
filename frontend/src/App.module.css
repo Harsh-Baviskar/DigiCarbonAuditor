@@ -1,4 +1,4 @@
-/* Logical grouping and spacing. High-level → insight → detail flow. */
+﻿/* Logical grouping and spacing. High-level ΓåÆ insight ΓåÆ detail flow. */
 .scanSection {
   margin-bottom: var(--space-lg);
 }
@@ -11,6 +11,14 @@
 }
 
 .summarySection {
+  margin-bottom: 0;
+}
+
+.carbonSection {
+  margin-bottom: 0;
+}
+
+.energySection {
   margin-bottom: 0;
 }
 

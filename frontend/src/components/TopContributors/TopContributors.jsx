@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { formatBytes } from '../../utils/formatters';
 import InfoTooltip from '../InfoTooltip/InfoTooltip';
 import styles from './TopContributors.module.css';
@@ -52,7 +52,7 @@ export default function TopContributors({ topContributors }) {
                   />
                 </div>
                 <span className={styles.meta}>
-                  {count.toLocaleString()} files · {formatBytes(sizeBytes)}
+                  {count.toLocaleString()} files ┬╖ {formatBytes(sizeBytes)}
                 </span>
               </li>
             ))}

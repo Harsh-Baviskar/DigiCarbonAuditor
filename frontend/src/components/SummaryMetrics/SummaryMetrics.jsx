@@ -1,4 +1,4 @@
-import { formatBytes, formatCarbonImpact } from '../../utils/formatters';
+﻿import { formatBytes, formatCarbonImpact } from '../../utils/formatters';
 import InfoTooltip from '../InfoTooltip/InfoTooltip';
 import styles from './SummaryMetrics.module.css';
 
@@ -38,7 +38,7 @@ export default function SummaryMetrics({ summary }) {
         ? { primary: wastedCarbon.primary, equivalence: wastedCarbon.equivalence }
         : null,
       tooltip:
-        'Storage occupied by duplicate copies. Estimated carbon based on typical data center energy use (~0.2 kg CO₂e per GB-year).',
+        'Storage occupied by duplicate copies. Estimated carbon based on typical data center energy use (~0.2 kg COΓéée per GB-year).',
     },
   ];
 
@@ -59,7 +59,7 @@ export default function SummaryMetrics({ summary }) {
               <span className={styles.carbonImpact} title={subtext.equivalence}>
                 {subtext.primary}
                 {subtext.equivalence && (
-                  <span className={styles.equivalence}> · {subtext.equivalence}</span>
+                  <span className={styles.equivalence}> ┬╖ {subtext.equivalence}</span>
                 )}
               </span>
             )}

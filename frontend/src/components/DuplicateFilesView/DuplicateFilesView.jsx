@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { formatBytes, truncateHash } from '../../utils/formatters';
 import InfoTooltip from '../InfoTooltip/InfoTooltip';
 import styles from './DuplicateFilesView.module.css';
@@ -43,7 +43,7 @@ function DuplicateGroup({ group, index }) {
             aria-expanded={expanded}
             aria-label={`Show ${paths.length - 3} more paths`}
           >
-            Show {paths.length - 3} more…
+            Show {paths.length - 3} moreΓÇª
           </button>
         )}
       </div>

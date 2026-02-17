@@ -1,7 +1,7 @@
-import styles from './StepIndicator.module.css';
+﻿import styles from './StepIndicator.module.css';
 
 /**
- * StepIndicator - Guided flow: Select → Scan → Review.
+ * StepIndicator - Guided flow: Select ΓåÆ Scan ΓåÆ Review.
  * Reduces cognitive load by showing users where they are in the process.
  * Current step highlighted; completed steps marked for confidence.
  */
@@ -29,7 +29,7 @@ export default function StepIndicator({ currentStep }) {
               aria-current={isActive ? 'step' : undefined}
             >
               <span className={styles.number} aria-hidden="true">
-                {isComplete ? '✓' : step.id}
+                {isComplete ? 'Γ£ô' : step.id}
               </span>
               <span className={styles.label}>{step.label}</span>
             </li>
