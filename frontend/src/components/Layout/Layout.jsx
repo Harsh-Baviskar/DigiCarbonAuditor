@@ -1,4 +1,5 @@
 import Header from '../Header/Header';
+import Navigation from '../Navigation/Navigation';
 import WhyThisMatters from '../WhyThisMatters/WhyThisMatters';
 import styles from './Layout.module.css';
 
@@ -7,17 +8,21 @@ import styles from './Layout.module.css';
  * 
  * Structure:
  * 1. Header - Persistent branding at top
- * 2. Intro Section - Value proposition and trust signals (context before action)
- * 3. Main Content - Primary user workflow (folder selection → scan → results)
- * 4. Footer - Minimal credits and context
+ * 2. Navigation - Main section navigation
+ * 3. Intro Section - Value proposition and trust signals (context before action)
+ * 4. Main Content - Primary user workflow (folder selection → scan → results)
+ * 5. Footer - Minimal credits and context
  * 
  * Uses semantic HTML for accessibility and SEO
  */
-export default function Layout({ children }) {
+export default function Layout({ children, activeSection, onSectionChange }) {
   return (
     <div className={styles.pageWrapper}>
       {/* 1. Professional header - persistent at top */}
       <Header />
+      
+      {/* 2. Navigation bar - section switching */}
+      <Navigation activeSection={activeSection} onSectionChange={onSectionChange} />
 
       {/* 2. Two-column layout: sidebar (why) + main content area */}
       <div className={styles.contentWrapper}>

@@ -3,7 +3,7 @@
   flex-shrink: 0;
   width: 100%;
   padding: var(--space-lg);
-  background: linear-gradient(#367756, #195158);
+  background: linear-gradient(#355042, #083e46);
   border: 1px solid var(--color-surface);
   border-radius: var(--radius-md);
 }

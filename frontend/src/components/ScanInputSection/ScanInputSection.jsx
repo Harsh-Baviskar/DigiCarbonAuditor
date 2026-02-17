@@ -3,28 +3,39 @@ import styles from './ScanInputSection.module.css';
 
 /**
  * ScanInputSection - Intuitive folder selection for non-technical users.
- * "Select Folder" uses system picker where supported; manual input as fallback.
- * Clear indication of selected path, validation feedback, reduced cognitive load.
+ * Note: Browser security prevents reading full paths from folder picker.
+ * Users must type the complete absolute path manually.
  */
 export default function ScanInputSection({ onScan, isScanning }) {
   const [path, setPath] = useState('');
   const [pathError, setPathError] = useState(null);
+  const [pickerHint, setPickerHint] = useState(null);
   const fileInputRef = useRef(null);
 
-  const handleFolderSelect = (e) => {
+  const handleFolderSelect = async (e) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
-    // Derive folder name from first file's relative path (browsers don't expose full path)
+    
+    // Get folder name from browser (but not full path due to security)
     const firstPath = files[0].webkitRelativePath || files[0].name;
     const folderName = firstPath.split('/')[0] || firstPath;
-    setPath(folderName);
-    setPathError(null);
+    
+    // Show helpful hint with common Windows paths
+    const username = 'YourName'; // Users will need to replace this
+    setPickerHint(
+      `Selected folder: "${folderName}". Please type the complete path below. Common paths:\n` +
+      `• C:\\Users\\${username}\\Documents\n` +
+      `• C:\\Users\\${username}\\Downloads\n` +
+      `• C:\\Users\\${username}\\Desktop`
+    );
+    
     e.target.value = '';
   };
 
   const handleInputChange = (e) => {
     setPath(e.target.value);
     setPathError(null);
+    setPickerHint(null); // Clear picker hint when user starts typing
   };
 
   const handleSubmit = (e) => {
@@ -74,9 +85,9 @@ export default function ScanInputSection({ onScan, isScanning }) {
             </span>
           )}
         </div>
-        <div className={styles.divider}>or type path</div>
+        <div className={styles.divider}>or type full path</div>
         <label htmlFor="scan-path" className={styles.label}>
-          Directory path
+          Directory path (full absolute path required)
         </label>
         <div className={styles.inputRow}>
           <input
@@ -84,7 +95,7 @@ export default function ScanInputSection({ onScan, isScanning }) {
             type="text"
             value={path}
             onChange={handleInputChange}
-            placeholder="e.g. C:\Users\Documents or /home/user/data"
+            placeholder="e.g. C:\Users\aradh\Documents or C:\Users\aradh\Downloads"
             disabled={isScanning}
             className={`${styles.input} ${pathError ? styles.inputError : ''}`}
             aria-describedby="scan-hint"
@@ -105,9 +116,16 @@ export default function ScanInputSection({ onScan, isScanning }) {
             {pathError}
           </p>
         )}
-        <p id="scan-hint" className={styles.hint}>
-          Choose a folder or enter a path to analyze for duplicates and carbon footprint.
-        </p>
+        {pickerHint && (
+          <p className={styles.hint} style={{ whiteSpace: 'pre-line', marginTop: '0.5rem' }}>
+            {pickerHint}
+          </p>
+        )}
+        {!pickerHint && (
+          <p id="scan-hint" className={styles.hint}>
+            Choose a folder or enter a path to analyze for duplicates and carbon footprint.
+          </p>
+        )}
       </form>
     </section>
   );
