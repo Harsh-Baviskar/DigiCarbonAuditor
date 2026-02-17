@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Frontend Data Flow Diagnostic</title>
+  <style>
+    body { font-family: monospace; max-width: 1200px; margin: 20px auto; padding: 20px; background: #f5f5f5; }
+    .container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .panel { background: white; padding: 20px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    h1 { grid-column: 1/-1; color: #333; }
+    h2 { border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-top: 0; }
+    .test-section { grid-column: 1/-1; }
+    input, select, button { padding: 10px; font-size: 14px; margin: 5px 0; width: 100%; box-sizing: border-box; }
+    button { background: #007bff; color: white; border: none; cursor: pointer; width: auto; }
+    button:hover { background: #0056b3; }
+    pre { background: #f9f9f9; padding: 15px; overflow-x: auto; border-left: 3px solid #007bff; }
+    .success { color: #28a745; font-weight: bold; }
+    .error { color: #dc3545; font-weight: bold; }
+    .warning { color: #ff9800; font-weight: bold; }
+    .metric { margin: 10px 0; }
+    .metric-label { font-weight: bold; }
+    .metric-value { color: #007bff; font-size: 18px; }
+  </style>
+</head>
+<body>
+  <h1>🔍 Frontend Data Flow Diagnostic</h1>
+  
+  <div class="test-section">
+    <h2>Manual API Test</h2>
+    <div class="container">
+      <div class="panel">
+        <h3>Input Parameters</h3>
+        <label>Storage Size (GB):</label>
+        <input type="number" id="storageGB" value="100" min="1">
+        
+        <label>Region:</label>
+        <select id="region">
+          <option value="IN-WE">India West (447)</option>
+          <option value="FR">France (35)</option>
+          <option value="US-CAL-CISO">California (177)</option>
+        </select>
+        
+        <button onclick="testFullFlow()">Test Full Flow</button>
+      </div>
+      
+      <div class="panel" id="step1">
+        <h3>Step 1: parseStorageSize()</h3>
+        <pre id="step1-result">Waiting...</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="test-section">
+    <div class="container">
+      <div class="panel" id="step2">
+        <h3>Step 2: Backend /calculate Request</h3>
+        <pre id="step2-result">Waiting...</pre>
+      </div>
+      
+      <div class="panel" id="step3">
+        <h3>Step 3: Backend Response (Raw)</h3>
+        <pre id="step3-result">Waiting...</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="test-section">
+    <div class="container">
+      <div class="panel" id="step4">
+        <h3>Step 4: Transform Response</h3>
+        <pre id="step4-result">Waiting...</pre>
+      </div>
+      
+      <div class="panel" id="step5">
+        <h3>Step 5: Component Would Receive</h3>
+        <pre id="step5-result">Waiting...</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="test-section">
+    <div class="panel">
+      <h3>Final Check: What Components See</h3>
+      <div id="final-check"></div>
+    </div>
+  </div>
+
+  <script>
+    async function testFullFlow() {
+      const storageGB = parseFloat(document.getElementById('storageGB').value);
+      const region = document.getElementById('region').value;
+      
+      // Step 1: parseStorageSize
+      const step1 = {
+        input: `${storageGB} GB`,
+        calculation: `${storageGB} / 1024`,
+        output: (storageGB / 1024),
+        outputTB: `${(storageGB / 1024).toFixed(10)} TB`
+      };
+      document.getElementById('step1-result').textContent = JSON.stringify(step1, null, 2);
+      
+      const storageTB = storageGB / 1024;
+      
+      // Step 2: Request
+      const step2 = {
+        endpoint: 'POST http://localhost:5000/calculate',
+        payload: {
+          storage_tb: storageTB,
+          region: region
+        }
+      };
+      document.getElementById('step2-result').textContent = JSON.stringify(step2, null, 2);
+      
+      try {
+        // Step 3: Actual request
+        const response = await fetch('http://localhost:5000/calculate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            storage_tb: storageTB,
+            region: region
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        
+        const backendResponse = await response.json();
+        document.getElementById('step3-result').innerHTML = 
+          `<span class="success">✅ Status 200</span>\n` + 
+          JSON.stringify(backendResponse, null, 2);
+        
+        // Step 4: Transform
+        const totalBytes = (backendResponse.storage_tb || 0) * 1024 * 1024 * 1024 * 1024;
+        
+        const step4 = {
+          inputs: {
+            storage_tb: backendResponse.storage_tb,
+            energy_kwh_per_year: backendResponse.energy_kwh_per_year,
+            carbon_kg_per_year: backendResponse.carbon_kg_per_year,
+            carbon_cost_estimate: backendResponse.carbon_cost_estimate
+          },
+          transformations: {
+            'storage_tb -> totalStorageBytes': `${backendResponse.storage_tb} * (1024^4) = ${totalBytes}`,
+            'energy_kwh_per_year -> energyKwhPerYear': `Number(${backendResponse.energy_kwh_per_year}) = ${Number(backendResponse.energy_kwh_per_year)}`,
+            'carbon_kg_per_year -> carbonKgPerYear': `Number(${backendResponse.carbon_kg_per_year}) = ${Number(backendResponse.carbon_kg_per_year)}`,
+            'carbon_cost_estimate -> carbonCostEstimate': `Number(${backendResponse.carbon_cost_estimate}) = ${Number(backendResponse.carbon_cost_estimate)}`
+          }
+        };
+        document.getElementById('step4-result').textContent = JSON.stringify(step4, null, 2);
+        
+        // Step 5: Component props
+        const componentProps = {
+          summary: {
+            totalStorageBytes: totalBytes,
+            totalFiles: backendResponse.files_scanned || 0,
+            duplicateFilesCount: 0,
+            wastedStorageBytes: 0
+          },
+          energyKwhPerYear: Number(backendResponse.energy_kwh_per_year ?? 0),
+          carbonKgPerYear: Number(backendResponse.carbon_kg_per_year ?? 0),
+          carbonCostEstimate: Number(backendResponse.carbon_cost_estimate ?? 0)
+        };
+        document.getElementById('step5-result').textContent = JSON.stringify(componentProps, null, 2);
+        
+        // Final check
+        const carbonKg = componentProps.carbonKgPerYear ?? 0;
+        const energyKwh = componentProps.energyKwhPerYear ?? 0;
+        const costEst = componentProps.carbonCostEstimate ?? 0;
+        const storageTbForDisplay = (componentProps.summary.totalStorageBytes / (1024 ** 4)).toFixed(2);
+        
+        const finalCheck = `
+<div class="metric"><span class="metric-label">Storage (TB):</span> <span class="metric-value">${storageTbForDisplay}</span></div>
+<div class="metric"><span class="metric-label">Energy (kWh/year):</span> <span class="metric-value">${energyKwh.toLocaleString('en-US', {maximumFractionDigits: 1})}</span> <span class="${energyKwh > 0 ? 'success' : 'error'}">${energyKwh > 0 ? '✅' : '❌'}</span></div>
+<div class="metric"><span class="metric-label">Carbon (kg/year):</span> <span class="metric-value">${carbonKg.toLocaleString('en-US', {maximumFractionDigits: 1})}</span> <span class="${carbonKg > 0 ? 'success' : 'error'}">${carbonKg > 0 ? '✅' : '❌'}</span></div>
+<div class="metric"><span class="metric-label">Cost ($/year):</span> <span class="metric-value">$${costEst.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span> <span class="${costEst > 0 ? 'success' : 'error'}">${costEst > 0 ? '✅' : '❌'}</span></div>
+<br>
+<p><span class="${(energyKwh > 0 && carbonKg > 0 && costEst > 0) ? 'success' : 'error'}">
+  ${(energyKwh > 0 && carbonKg > 0 && costEst > 0) ? '✅ ALL VALUES PRESENT - Components should display correctly!' : '❌ Some values are zero or missing!'}
+</span></p>
+        `;
+        document.getElementById('final-check').innerHTML = finalCheck;
+        
+      } catch (error) {
+        document.getElementById('step3-result').innerHTML = `<span class="error">❌ Error: ${error.message}</span>\n\nMake sure backend is running: python app.py`;
+      }
+    }
+    
+    // Quick test on load
+    window.addEventListener('load', () => {
+      console.log('Diagnostic page loaded. Click "Test Full Flow" to begin.');
+    });
+  </script>
+</body>
+</html>

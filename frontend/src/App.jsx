@@ -16,7 +16,7 @@ import './App.css';
  * - Wasteful Files Detector: Identify unused files (coming soon)
  */
 export default function App() {
-  const [activeSection, setActiveSection] = useState('duplicate-detector');
+  const [activeSection, setActiveSection] = useState('carbon-footprint');
 
   const renderPage = () => {
     switch (activeSection) {
@@ -29,7 +29,7 @@ export default function App() {
       case 'wasteful-files':
         return <WastefulFilesPage />;
       default:
-        return <DuplicateDetectorPage />;
+        return <CarbonFootprintPage />;
     }
   };
 

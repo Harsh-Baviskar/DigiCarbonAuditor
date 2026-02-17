@@ -14,6 +14,14 @@
   margin-bottom: 0;
 }
 
+.carbonSection {
+  margin-bottom: 0;
+}
+
+.energySection {
+  margin-bottom: 0;
+}
+
 /* Top Contributors + Suggested Actions side-by-side on wider screens */
 .insightGrid {
   display: grid;

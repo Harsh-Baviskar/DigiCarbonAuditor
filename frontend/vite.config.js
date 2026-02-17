@@ -6,8 +6,12 @@ export default defineConfig({
   server: {
     port: 3000,
     proxy: {
-      '/api': {
-        target: 'http://127.0.0.1:8000',
+      '/calculate': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+      },
+      '/upload-folder': {
+        target: 'http://localhost:5000',
         changeOrigin: true,
         secure: false,
       },

@@ -11,18 +11,33 @@ export default function StatusFeedback({
   error,
   scannedPath,
   wastedStorageBytes,
+  totalFilesCount,
 }) {
   const [simulatedCount, setSimulatedCount] = useState(0);
 
-  // Mock progress during loading: simulates file count for user feedback (no backend)
+  // Display progress based on actual file count or simulate if not available
   useEffect(() => {
     if (status !== 'loading') return;
     setSimulatedCount(0);
-    const interval = setInterval(() => {
-      setSimulatedCount((prev) => Math.min(prev + 47, 1247));
-    }, 100);
-    return () => clearInterval(interval);
-  }, [status]);
+    
+    if (totalFilesCount && totalFilesCount > 0) {
+      // Use actual file count provided
+      const interval = setInterval(() => {
+        setSimulatedCount((prev) => {
+          // Increment gradually towards total, but don't exceed it
+          const increment = Math.max(1, Math.floor(totalFilesCount / 20));
+          return Math.min(prev + increment, totalFilesCount);
+        });
+      }, 100);
+      return () => clearInterval(interval);
+    } else {
+      // Fallback to mock progress if no file count provided
+      const interval = setInterval(() => {
+        setSimulatedCount((prev) => Math.min(prev + 47, 1247));
+      }, 100);
+      return () => clearInterval(interval);
+    }
+  }, [status, totalFilesCount]);
 
   if (!status || status === 'idle') {
     return null;
@@ -35,7 +50,7 @@ export default function StatusFeedback({
           <div className={styles.progressFill} />
         </div>
         <p className={styles.message}>
-          Scanning storage… {simulatedCount > 0 && `${simulatedCount.toLocaleString()} files processed.`}
+          Scanning storage… {simulatedCount > 0 && totalFilesCount ? `${simulatedCount.toLocaleString()} of ${totalFilesCount.toLocaleString()} files processed.` : simulatedCount > 0 && `${simulatedCount.toLocaleString()} files processed.`}
         </p>
         <p className={styles.explanation}>
           Reading files, computing hashes for duplicate detection, and estimating carbon footprint.

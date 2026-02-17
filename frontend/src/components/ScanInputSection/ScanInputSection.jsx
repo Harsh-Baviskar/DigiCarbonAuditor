@@ -3,39 +3,57 @@ import styles from './ScanInputSection.module.css';
 
 /**
  * ScanInputSection - Intuitive folder selection for non-technical users.
- * Note: Browser security prevents reading full paths from folder picker.
- * Users must type the complete absolute path manually.
+ * "Select Folder" uses system picker where supported; manual input as fallback.
+ * Accepts storage size in GB and region for carbon intensity calculation.
  */
 export default function ScanInputSection({ onScan, isScanning }) {
   const [path, setPath] = useState('');
+  const [region, setRegion] = useState('IN-WE');
   const [pathError, setPathError] = useState(null);
-  const [pickerHint, setPickerHint] = useState(null);
+  const [selectedFiles, setSelectedFiles] = useState(null);
+  const [folderSizeGB, setFolderSizeGB] = useState(null);
   const fileInputRef = useRef(null);
 
-  const handleFolderSelect = async (e) => {
+  const calculateFolderSize = (files) => {
+    let totalBytes = 0;
+    for (let i = 0; i < files.length; i++) {
+      totalBytes += files[i].size;
+    }
+    // Convert bytes to GB
+    return totalBytes / (1024 * 1024 * 1024);
+  };
+
+  const handleFolderSelect = (e) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
     
-    // Get folder name from browser (but not full path due to security)
-    const firstPath = files[0].webkitRelativePath || files[0].name;
-    const folderName = firstPath.split('/')[0] || firstPath;
+    // Get the full folder path from webkitRelativePath (shows relative path from selected folder)
+    const firstFile = files[0];
+    const relativePath = firstFile.webkitRelativePath || firstFile.name;
+    // Extract the root folder path
+    const folderPath = relativePath.split('/')[0];
     
-    // Show helpful hint with common Windows paths
-    const username = 'YourName'; // Users will need to replace this
-    setPickerHint(
-      `Selected folder: "${folderName}". Please type the complete path below. Common paths:\n` +
-      `• C:\\Users\\${username}\\Documents\n` +
-      `• C:\\Users\\${username}\\Downloads\n` +
-      `• C:\\Users\\${username}\\Desktop`
-    );
+    // Calculate total size from all files
+    const calculatedSizeGB = calculateFolderSize(files);
     
+    // Store both folder path and files for later use
+    // Display: folder path (size in GB, number of files)
+    setPath(`${folderPath} (${calculatedSizeGB.toFixed(2)} GB, ${files.length} files)`);
+    setSelectedFiles(files);
+    setFolderSizeGB(calculatedSizeGB);
+    setPathError(null);
     e.target.value = '';
   };
 
   const handleInputChange = (e) => {
     setPath(e.target.value);
+    setSelectedFiles(null);
+    setFolderSizeGB(null);
     setPathError(null);
-    setPickerHint(null); // Clear picker hint when user starts typing
+  };
+
+  const handleRegionChange = (e) => {
+    setRegion(e.target.value);
   };
 
   const handleSubmit = (e) => {
@@ -43,7 +61,23 @@ export default function ScanInputSection({ onScan, isScanning }) {
     const trimmed = path.trim();
     if (!trimmed || isScanning) return;
     setPathError(null);
-    onScan(trimmed);
+    
+    // If folder was selected, use the stored calculated size
+    if (folderSizeGB !== null && folderSizeGB > 0) {
+      console.log(`Folder selected with total size: ${folderSizeGB} GB and ${selectedFiles?.length} files`);
+      // Pass size, region, and file count
+      onScan(folderSizeGB.toString(), region, selectedFiles?.length || null);
+    } else if (folderSizeGB === 0) {
+      setPathError('Selected folder is empty. Please select a folder with files.');
+    } else {
+      // Manual input - user should enter size in GB (no file count available)
+      const sizeNum = parseFloat(trimmed);
+      if (isNaN(sizeNum) || sizeNum <= 0) {
+        setPathError('Please select a folder or enter a valid storage size in GB (e.g., 500).');
+        return;
+      }
+      onScan(trimmed, region);
+    }
   };
 
   const handleSelectFolderClick = () => {
@@ -85,9 +119,9 @@ export default function ScanInputSection({ onScan, isScanning }) {
             </span>
           )}
         </div>
-        <div className={styles.divider}>or type full path</div>
+        <div className={styles.divider}>or type storage size</div>
         <label htmlFor="scan-path" className={styles.label}>
-          Directory path (full absolute path required)
+          Storage size (in GB)
         </label>
         <div className={styles.inputRow}>
           <input
@@ -95,7 +129,7 @@ export default function ScanInputSection({ onScan, isScanning }) {
             type="text"
             value={path}
             onChange={handleInputChange}
-            placeholder="e.g. C:\Users\aradh\Documents or C:\Users\aradh\Downloads"
+            placeholder="e.g., 500 (for 500 GB) or select a folder above"
             disabled={isScanning}
             className={`${styles.input} ${pathError ? styles.inputError : ''}`}
             aria-describedby="scan-hint"
@@ -116,16 +150,33 @@ export default function ScanInputSection({ onScan, isScanning }) {
             {pathError}
           </p>
         )}
-        {pickerHint && (
-          <p className={styles.hint} style={{ whiteSpace: 'pre-line', marginTop: '0.5rem' }}>
-            {pickerHint}
-          </p>
-        )}
-        {!pickerHint && (
-          <p id="scan-hint" className={styles.hint}>
-            Choose a folder or enter a path to analyze for duplicates and carbon footprint.
-          </p>
-        )}
+        <p id="scan-hint" className={styles.hint}>
+          Select a folder to automatically calculate its size, or manually enter storage size in GB (e.g., 500).
+        </p>
+
+        <div className={styles.regionSection}>
+          <label htmlFor="region-select" className={styles.label}>
+            Region (for carbon intensity)
+          </label>
+          <select
+            id="region-select"
+            value={region}
+            onChange={handleRegionChange}
+            disabled={isScanning}
+            className={styles.select}
+          >
+            <option value="IN-WE">India (West) - 447 gCO₂/kWh</option>
+            <option value="IN-KA">India (Karnataka) - ~450 gCO₂/kWh</option>
+            <option value="IN-DL">India (Delhi) - ~450 gCO₂/kWh</option>
+            <option value="FR">France - 25 gCO₂/kWh</option>
+            <option value="DE">Germany - ~380 gCO₂/kWh</option>
+            <option value="GB">Great Britain - ~200 gCO₂/kWh</option>
+            <option value="US-VA">United States (Virginia) - ~360 gCO₂/kWh</option>
+            <option value="US-TX">United States (Texas) - ~380 gCO₂/kWh</option>
+            <option value="US-CA">United States (California) - ~177 gCO₂/kWh</option>
+            <option value="US-NY">United States (New York) - ~120 gCO₂/kWh</option>
+          </select>
+        </div>
       </form>
     </section>
   );
