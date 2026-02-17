@@ -3,11 +3,15 @@
  * Fetches file categorization + cold data report from Flask backend.
  */
 
-export async function fetchIntelligentUsage(path) {
+export async function fetchIntelligentUsage(path, fileCount = null) {
     const params = new URLSearchParams({
         path: path,
         threshold_days: 180,
     });
+    
+    if (fileCount !== null) {
+        params.append('file_count', fileCount.toString());
+    }
 
     const response = await fetch(
         `/api/intelligent-usage?${params.toString()}`

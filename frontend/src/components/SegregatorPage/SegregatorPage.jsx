@@ -15,14 +15,14 @@ export default function SegregatorPage() {
   const [intelligentUsageLoading, setIntelligentUsageLoading] = useState(false);
   const [intelligentUsageError, setIntelligentUsageError] = useState(null);
 
-  const handleScan = useCallback(async (path) => {
+  const handleScan = useCallback(async (path, region = 'IN-WE', fileCount = null) => {
     setIsScanning(true);
     setIntelligentUsageLoading(true);
     setIntelligentUsageError(null);
     setIntelligentUsageReport(null);
 
     try {
-      const data = await fetchIntelligentUsage(path);
+      const data = await fetchIntelligentUsage(path, fileCount);
       console.log("INTELLIGENT USAGE DATA:", data);
       setIntelligentUsageReport(data);
     } catch (err) {

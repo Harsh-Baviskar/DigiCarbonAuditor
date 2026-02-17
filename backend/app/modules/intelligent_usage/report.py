@@ -134,31 +134,37 @@ def generate_intelligent_usage_report(
     # -------------------------------
     # Scan + Categorize + Cold Detect
     # -------------------------------
+    processed_files = 0
     for file in files:
-        category = categorize_file(file)
-        metadata = get_file_usage_metadata(file)
+        try:
+            category = categorize_file(file)
+            metadata = get_file_usage_metadata(file)
+            
+            category_counter[category] += 1
+            total_storage_mb += metadata["size_mb"]
+            processed_files += 1
 
-        category_counter[category] += 1
-        total_storage_mb += metadata["size_mb"]
+            # Industry-grade cold candidate detection
+            if is_cold_candidate(
+                last_activity=metadata["last_modified"],  # Reliable signal
+                category=category,
+                size_mb=metadata["size_mb"],
+                threshold_days=threshold_days,
+            ):
+                cold_category_counter[category] += 1
+                cold_storage_mb += metadata["size_mb"]
 
-        # Industry-grade cold candidate detection
-        if is_cold_candidate(
-            last_activity=metadata["last_modified"],  # Reliable signal
-            category=category,
-            size_mb=metadata["size_mb"],
-            threshold_days=threshold_days,
-        ):
-            cold_category_counter[category] += 1
-            cold_storage_mb += metadata["size_mb"]
-
-            cold_files.append({
-                "file_name": metadata["file_name"],
-                "file_path": metadata["file_path"],
-                "size_mb": metadata["size_mb"],
-                "category": category,
-                "last_accessed": metadata["last_accessed"].isoformat(),
-                "last_modified": metadata["last_modified"].isoformat(),
-            })
+                cold_files.append({
+                    "file_name": metadata["file_name"],
+                    "file_path": metadata["file_path"],
+                    "size_mb": metadata["size_mb"],
+                    "category": category,
+                    "last_accessed": metadata["last_accessed"].isoformat(),
+                    "last_modified": metadata["last_modified"].isoformat(),
+                })
+        except (OSError, PermissionError, FileNotFoundError) as e:
+            # Skip files that can't be accessed
+            continue
 
     # -------------------------------
     # Generate Recommendations
@@ -184,7 +190,7 @@ def generate_intelligent_usage_report(
     # Final Report Output
     # -------------------------------
     return {
-        "total_files": len(files),
+        "total_files": processed_files,  # Only count successfully processed files
         "total_storage_mb": round(total_storage_mb, 4),
         "cold_files_count": len(cold_files),
         "cold_storage_mb": round(cold_storage_mb, 4),

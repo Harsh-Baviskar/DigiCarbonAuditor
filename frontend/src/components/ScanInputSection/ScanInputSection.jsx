@@ -62,13 +62,15 @@ export default function ScanInputSection({ onScan, isScanning }) {
     if (!trimmed || isScanning) return;
     setPathError(null);
     
-    // If folder was selected, use the stored calculated size
-    if (folderSizeGB !== null && folderSizeGB > 0) {
-      console.log(`Folder selected with total size: ${folderSizeGB} GB and ${selectedFiles?.length} files`);
-      // Pass size, region, and file count
-      onScan(folderSizeGB.toString(), region, selectedFiles?.length || null);
-    } else if (folderSizeGB === 0) {
-      setPathError('Selected folder is empty. Please select a folder with files.');
+    // Check if this looks like a folder selection (contains size and file count)
+    const folderMatch = trimmed.match(/^(.+?)\s*\(\s*([\d.]+)\s*GB,\s*(\d+)\s*files?\s*\)$/i);
+    if (folderMatch) {
+      // Extract folder name from the display string
+      const folderName = folderMatch[1].trim();
+      const fileCount = parseInt(folderMatch[3]);
+      console.log(`Folder selected: ${folderName} with ${fileCount} accessible files`);
+      // Pass folder name for backend to generate realistic estimates
+      onScan(folderName, region, fileCount);
     } else {
       // Manual input - user should enter size in GB (no file count available)
       const sizeNum = parseFloat(trimmed);

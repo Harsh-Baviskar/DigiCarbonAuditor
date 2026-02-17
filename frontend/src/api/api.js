@@ -139,10 +139,16 @@ export async function startScan(pathOrFile, region = 'IN-WE') {
     if (pathOrFile instanceof File) {
       result = await callBackendUpload(pathOrFile, region);
     } else {
-      // Otherwise treat it as a storage size string (in GB)
-      // and call the calculate endpoint
-      const storageTb = parseStorageSize(pathOrFile);
-      result = await callBackendCalculate(storageTb, region);
+      // Check if it's a numeric storage size or a folder name
+      const numValue = parseFloat(pathOrFile);
+      if (!isNaN(numValue) && numValue > 0) {
+        // It's a numeric storage size in GB
+        const storageTb = numValue / 1024; // Convert GB to TB
+        result = await callBackendCalculate(storageTb, region);
+      } else {
+        // It's a folder name - pass it directly to backend for estimation
+        result = await callBackendCalculate(pathOrFile, region);
+      }
     }
 
     console.log('Backend response:', result);
@@ -167,7 +173,7 @@ export async function startScan(pathOrFile, region = 'IN-WE') {
       scannedPath: pathOrFile instanceof File ? pathOrFile.name : pathOrFile,
       region: region,
       summary: {
-        totalFiles: result.files_scanned || 0,
+        totalFiles: result.estimated_files || result.files_scanned || 0,
         totalStorageBytes: totalBytes,
         duplicateFilesCount: 0, // Not provided by backend
         wastedStorageBytes: 0, // Not provided by backend
