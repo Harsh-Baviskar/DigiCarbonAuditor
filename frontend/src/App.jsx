@@ -1,9 +1,10 @@
 import { useState } from 'react';
+import { ThemeProvider } from './context/ThemeContext';
 import Layout from './components/Layout/Layout';
 import CarbonFootprintPage from './components/CarbonFootprintPage/CarbonFootprintPage';
-import DuplicateDetectorPage from './components/DuplicateDetectorPage/DuplicateDetectorPage';
 import SegregatorPage from './components/SegregatorPage/SegregatorPage';
 import WastefulFilesPage from './components/WastefulFilesPage/WastefulFilesPage';
+import GoogleDrivePage from './components/GoogleDrivePage/GoogleDrivePage';
 import './App.css';
 
 /**
@@ -11,9 +12,8 @@ import './App.css';
  *
  * Features:
  * - Carbon Footprint Estimator: Calculate storage carbon emissions
- * - Duplicate Detector: Find and manage duplicate files
- * - Segregator: Organize files by type with intelligent usage insights
- * - Wasteful Files Detector: Identify unused files (coming soon)
+ * - Segregator: Organize files by type (coming soon)
+ * - Wasteful Files Detector: Find duplicate and wasteful files
  */
 export default function App() {
   const [activeSection, setActiveSection] = useState('carbon-footprint');
@@ -22,21 +22,23 @@ export default function App() {
     switch (activeSection) {
       case 'carbon-footprint':
         return <CarbonFootprintPage />;
-      case 'duplicate-detector':
-        return <DuplicateDetectorPage />;
       case 'segregator':
         return <SegregatorPage />;
       case 'wasteful-files':
         return <WastefulFilesPage />;
+      case 'google-drive':
+        return <GoogleDrivePage />;
       default:
         return <CarbonFootprintPage />;
     }
   };
 
   return (
-    <Layout activeSection={activeSection} onSectionChange={setActiveSection}>
-      {renderPage()}
-    </Layout>
+    <ThemeProvider>
+      <Layout activeSection={activeSection} onSectionChange={setActiveSection}>
+        {renderPage()}
+      </Layout>
+    </ThemeProvider>
   );
 }
 

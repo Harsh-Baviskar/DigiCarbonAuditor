@@ -1,7 +1,7 @@
 /* Navigation - Main navigation bar below header */
 
 .navigation {
-  background: linear-gradient(135deg, var(--palette-primary-dark) 0%, var(--palette-deep) 100%);
+  background: var(--nav-bg);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   position: sticky;
@@ -29,7 +29,7 @@
 .navButton {
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--nav-text);
   cursor: pointer;
   font-family: inherit;
   font-size: 0.95rem;
@@ -42,8 +42,8 @@
 }
 
 .navButton:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: white;
+  background: var(--nav-hover-bg);
+  color: var(--nav-text-hover);
 }
 
 .navButton:focus {
@@ -52,8 +52,8 @@
 }
 
 .navButton.active {
-  color: white;
-  background: rgba(255, 255, 255, 0.12);
+  color: var(--nav-text-active);
+  background: var(--nav-active-bg);
   border-bottom-color: var(--palette-accent);
   font-weight: 600;
 }

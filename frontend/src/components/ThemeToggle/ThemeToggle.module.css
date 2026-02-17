@@ -1,0 +1,89 @@
+/* ThemeToggle - Animated dark/light mode switch */
+
+.toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  border-radius: 20px;
+  transition: opacity 0.2s ease;
+}
+
+.toggle:hover {
+  opacity: 0.85;
+}
+
+.toggle:focus-visible {
+  outline: 2px solid var(--palette-accent);
+  outline-offset: 2px;
+}
+
+/* Track - pill-shaped container */
+.track {
+  width: 52px;
+  height: 28px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  position: relative;
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+[data-theme="dark"] .track {
+  background: rgba(168, 191, 118, 0.15);
+  border-color: rgba(168, 191, 118, 0.3);
+}
+
+/* Thumb - sliding circle */
+.thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #ffffff;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.thumbDark {
+  transform: translateX(24px);
+  background: #1c2a22;
+}
+
+/* Icons */
+.icon {
+  width: 14px;
+  height: 14px;
+  position: absolute;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.sunIcon {
+  color: #e5a100;
+}
+
+.moonIcon {
+  color: #a8bf76;
+}
+
+.hidden {
+  opacity: 0;
+  transform: scale(0.5) rotate(30deg);
+}
+
+.sunIcon:not(.hidden) {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+
+.moonIcon:not(.hidden) {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}

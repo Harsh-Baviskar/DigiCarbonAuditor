@@ -1,6 +1,7 @@
 import Header from '../Header/Header';
 import Navigation from '../Navigation/Navigation';
 import WhyThisMatters from '../WhyThisMatters/WhyThisMatters';
+import whyThisMattersImg from '../../assets/whythismatter.jpg';
 import styles from './Layout.module.css';
 
 /**
@@ -24,27 +25,32 @@ export default function Layout({ children, activeSection, onSectionChange }) {
       {/* 2. Navigation bar - section switching */}
       <Navigation activeSection={activeSection} onSectionChange={onSectionChange} />
 
-      {/* 2. Two-column layout: sidebar (why) + main content area */}
+      {/* 3. Main content area */}
       <div className={styles.contentWrapper}>
         <div className={styles.container}>
-          <div className={styles.twoColumnLayout}>
-            {/* Left sidebar: Why this matters */}
-            <aside className={styles.sidebar}>
-              <WhyThisMatters />
-            </aside>
-
-            {/* Right column: Main workflow */}
-            <div className={styles.mainColumn}>
-              {/* Primary user workflow */}
-              <main id="main-content" role="main">
-                {children}
-              </main>
-            </div>
-          </div>
+          <main id="main-content" role="main">
+            {children}
+          </main>
         </div>
       </div>
 
-      {/* 4. Footer - lightweight, unobtrusive */}
+      {/* 4. Why this matters section - above footer */}
+      <section className={styles.whySection}>
+        <div className={styles.whyLayout}>
+          <div className={styles.whyText}>
+            <WhyThisMatters />
+          </div>
+          <div className={styles.whyImage}>
+            <img 
+              src={whyThisMattersImg} 
+              alt="Why digital carbon auditing matters" 
+              className={styles.whyImg}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* 5. Footer - lightweight, unobtrusive */}
       <footer className={styles.footer} role="contentinfo">
         <div className={styles.container}>
           <p className={styles.footerText}>

@@ -135,8 +135,129 @@
   --radius-sm: 4px;
   --radius-md: 6px;
   --radius-lg: 8px;
-  --shadow-sm: 0 1px 3px rgba(var(--palette-ink-rgb), 0.06);
-  --shadow-md: 0 2px 8px rgba(var(--palette-ink-rgb), 0.08);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+  /* Theme transition */
+  --theme-transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* ==========================================================================
+   DARK MODE - Override semantic tokens
+   Deep but not pure black; muted accents; softer contrast
+   ========================================================================== */
+
+[data-theme="dark"] {
+  /* Text hierarchy - light text on dark backgrounds */
+  --color-heading: #e8f0ec;
+  --color-text: #d4ddd8;
+  --color-text-secondary: #a8bdb3;
+  --color-text-muted: #7a9589;
+  
+  /* Palette text overrides for dark mode */
+  --palette-text-primary: #e8f0ec;
+  --palette-text-secondary: #a8bdb3;
+  --palette-text-muted: #7a9589;
+  --palette-text-rgb: 232, 240, 236;
+  
+  /* Surfaces - neutral dark gray */
+  --color-bg: #1a1a1a;
+  --color-bg-soft: #212121;
+  --color-bg-elevated: #2a2a2a;
+  --color-surface: #313131;
+  --color-surface-soft: #272727;
+  
+  /* Palette surface overrides */
+  --palette-surface-light: #1a1a1a;
+  --palette-surface-soft: #212121;
+  --palette-surface-sage: #313131;
+  --palette-paper: #2a2a2a;
+  
+  /* Primary - slightly brighter for dark backgrounds */
+  --color-primary: #5a9971;
+  --color-primary-hover: #6bab82;
+  --color-action: #5a9971;
+  --color-action-hover: #6bab82;
+  
+  /* Accent - softer highlights */
+  --color-accent: #a8bf76;
+  --color-accent-hover: #5a9971;
+  --color-success: #a8bf76;
+  --color-success-bg: rgba(168, 191, 118, 0.12);
+
+  /* Highlight - toned down for dark */
+  --color-highlight: #d4cf5e;
+  --color-highlight-bg: rgba(212, 207, 94, 0.10);
+  
+  /* Secondary */
+  --color-secondary: #6e9985;
+  --color-secondary-light: #3d5e4f;
+  
+  /* Deep backgrounds */
+  --color-deep: #252525;
+  --color-deep-darker: #111111;
+  
+  /* Borders - lighter for visibility on dark */
+  --color-border: rgba(232, 240, 236, 0.12);
+  --color-border-strong: rgba(232, 240, 236, 0.22);
+  
+  /* Feedback - adjusted for dark */
+  --color-error: #f87171;
+  --color-error-bg: rgba(248, 113, 113, 0.12);
+  --palette-error: #f87171;
+  --palette-error-bg: rgba(248, 113, 113, 0.12);
+  
+  /* Shadows - more pronounced on dark */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.3);
+  
+  /* Navigation/header variables for dark theme */
+  --nav-bg: linear-gradient(135deg, #1a3022 0%, #0f2118 100%);
+  --nav-text: rgba(200, 220, 210, 0.85);
+  --nav-text-hover: #e8f0ec;
+  --nav-text-active: #e8f0ec;
+  --nav-hover-bg: rgba(200, 220, 210, 0.08);
+  --nav-active-bg: rgba(200, 220, 210, 0.12);
+  
+  /* On-dark section colors (WhyThisMatters, footer) */
+  --section-dark-bg: linear-gradient(135deg, #0f1a14 0%, #162019 50%, #1a2520 100%);
+  --section-dark-text: #d4ddd8;
+  --section-dark-heading: #e8f0ec;
+  --section-dark-item-bg: rgba(200, 220, 210, 0.05);
+  --section-dark-item-border: rgba(200, 220, 210, 0.1);
+  
+  /* Footer */
+  --footer-bg: #0a120d;
+  --footer-text: #a8bdb3;
+  
+  /* Button on-primary text */
+  --color-on-primary: #ffffff;
+  
+  /* Focus ring */
+  --color-focus-ring: rgba(90, 153, 113, 0.3);
+}
+
+/* Light mode explicit variables (for components that need them) */
+:root,
+[data-theme="light"] {
+  --nav-bg: linear-gradient(135deg, var(--palette-primary-dark) 0%, var(--palette-deep) 100%);
+  --nav-text: rgba(255, 255, 255, 0.85);
+  --nav-text-hover: #ffffff;
+  --nav-text-active: #ffffff;
+  --nav-hover-bg: rgba(255, 255, 255, 0.08);
+  --nav-active-bg: rgba(255, 255, 255, 0.12);
+  
+  --section-dark-bg: linear-gradient(rgb(31, 42, 53), rgb(34, 53, 66), rgb(15, 30, 39), rgb(52, 66, 29));
+  --section-dark-text: rgba(255, 255, 255, 0.85);
+  --section-dark-heading: #ffffff;
+  --section-dark-item-bg: rgba(255, 255, 255, 0.05);
+  --section-dark-item-border: rgba(255, 255, 255, 0.1);
+  
+  --footer-bg: rgb(11, 16, 19);
+  --footer-text: #ffffff;
+  
+  --color-on-primary: #ffffff;
+  --color-focus-ring: rgba(74, 124, 89, 0.15);
 }
 
 * {
@@ -151,10 +272,18 @@ body {
   color: var(--color-text);
   background-color: var(--color-bg);
   -webkit-font-smoothing: antialiased;
+  transition: var(--theme-transition);
 }
 
 /* Focus visible for accessibility - use primary for discoverability */
 :focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
+}
+
+/* Smooth theme transitions for all themed elements */
+*,
+*::before,
+*::after {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }

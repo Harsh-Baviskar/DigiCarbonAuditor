@@ -1,33 +1,83 @@
-﻿import styles from './WastefulFilesPage.module.css';
-import InfoTooltip from '../InfoTooltip/InfoTooltip';
+import { useState, useMemo } from 'react';
+import styles from './WastefulFilesPage.module.css';
+import StepIndicator from '../StepIndicator/StepIndicator';
+import ScanInputSection from '../ScanInputSection/ScanInputSection';
+import StatusFeedback from '../StatusFeedback/StatusFeedback';
+import DuplicateFilesView from '../DuplicateFilesView/DuplicateFilesView';
+import SuggestedActions from '../SuggestedActions/SuggestedActions';
+
+function getCurrentStep(isScanning, scanData) {
+  if (scanData) return 3;
+  if (isScanning) return 2;
+  return 1;
+}
 
 export default function WastefulFilesPage() {
+  const [scanData, setScanData] = useState(null);
+  const [isScanning, setIsScanning] = useState(false);
+  const [error, setError] = useState(null);
+
+  const currentStep = useMemo(() => getCurrentStep(isScanning, scanData), [isScanning, scanData]);
+
+  const handleScan = async (path, region = 'IN-WE', fileCount = null) => {
+    setIsScanning(true);
+    setError(null);
+    setScanData(null);
+
+    try {
+      const { startScan } = await import('../../api/api');
+      const result = await startScan(path, region);
+      setScanData(result);
+    } catch (err) {
+      setError(err.message || 'Failed to scan directory');
+      console.error('Scan error:', err);
+    } finally {
+      setIsScanning(false);
+    }
+  };
+
   return (
     <div className={styles.page} role="tabpanel" id="wasteful-files-panel">
       <div className={styles.header}>
-        <h2 className={styles.title}>
-          Wasteful Files Detector
-          <InfoTooltip text="Identify large, old, or unused files that waste storage space" />
-        </h2>
+        <h2 className={styles.title}>Wasteful Files Detector</h2>
         <p className={styles.description}>
-          Coming soon: Detect files that are consuming unnecessary storageΓÇölarge media files, temporary files, old downloads, and more.
+          Find and remove duplicate and wasteful files to save storage space and reduce your digital carbon footprint.
         </p>
       </div>
 
-      <div className={styles.content}>
-        <div className={styles.placeholder}>
-          <svg className={styles.icon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M3 6h18" />
-            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-            <path d="M10 11v6" />
-            <path d="M14 11v6" />
-          </svg>
-          <h3 className={styles.placeholderTitle}>Feature Under Development</h3>
-          <p className={styles.placeholderText}>
-            This feature will identify files that haven't been accessed in a long time, temporary files, and other space-wasting content to help you clean up efficiently.
-          </p>
+      <StepIndicator currentStep={currentStep} />
+
+      <ScanInputSection onScan={handleScan} isScanning={isScanning} />
+      
+      {isScanning && (
+        <StatusFeedback 
+          status="scanning" 
+          message="Scanning for wasteful and duplicate files..." 
+        />
+      )}
+      
+      {error && (
+        <StatusFeedback 
+          status="error" 
+          message={error} 
+        />
+      )}
+
+      {scanData && !isScanning && (
+        <div className={styles.results}>
+          {scanData.duplicateGroups && scanData.duplicateGroups.length > 0 ? (
+            <>
+              <SuggestedActions suggestedActions={scanData.suggestedActions} />
+              <DuplicateFilesView duplicateGroups={scanData.duplicateGroups} />
+            </>
+          ) : (
+            <StatusFeedback 
+              status="success" 
+              message="No wasteful or duplicate files found! Your storage is clean." 
+            />
+          )}
         </div>
-      </div>
+      )}
     </div>
   );
 }

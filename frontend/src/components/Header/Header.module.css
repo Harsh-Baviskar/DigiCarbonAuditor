@@ -22,11 +22,17 @@
   margin: 0 auto;
 }
 
+.topRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-lg);
+}
+
 .branding {
   display: flex;
   align-items: center;
   gap: var(--space-md);
-  margin-bottom: var(--space-lg);
 }
 
 /* Trust badges wrapper - positioned below header text */
@@ -45,7 +51,7 @@
 .icon {
   width: 60px;
   height: 60px;
-  color: #0d7e40; /* Fresh green accent color */
+  color: #387525; /* Fresh green accent color */
 }
 
 /* Application name - primary heading */
@@ -54,7 +60,7 @@
   font-size: var(--text-xl);
   font-weight: 700;
   line-height: var(--leading-tight);
-  color: var(--palette-paper);
+  color: #ffffff;
   letter-spacing: -0.02em;
 }
 

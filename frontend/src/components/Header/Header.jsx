@@ -1,5 +1,7 @@
 import styles from './Header.module.css';
 import headerBg from '../../assets/carbon-header-bg.jpg';
+import TrustBadges from '../TrustBadges/TrustBadges';
+import ThemeToggle from '../ThemeToggle/ThemeToggle';
 
 /**
  * Header - Persistent application header
@@ -10,10 +12,11 @@ export default function Header() {
     <header
       className={styles.header}
       role="banner"
-      style={{ backgroundImage: `linear-gradient(135deg, rgba(27, 66, 66, 0.5) 0%, rgba(9, 38, 53, 0.65) 100%), url(${headerBg})` }}
+      style={{ backgroundImage: `linear-gradient(135deg, rgba(15, 29, 29, 0.5) 0%, rgba(9, 38, 53, 0.65) 100%), url(${headerBg})` }}
     >
       <div className={styles.container}>
-        <div className={styles.branding}>
+        <div className={styles.topRow}>
+          <div className={styles.branding}>
           {/* App logo/icon - sustainability symbol */}
           <div className={styles.logo} aria-hidden="true">
             <svg
@@ -31,6 +34,13 @@ export default function Header() {
             <h1 className={styles.appName}>Digital Carbon Auditor</h1>
             <p className={styles.tagline}>Measure and reduce your digital footprint</p>
           </div>
+          </div>
+          <ThemeToggle />
+        </div>
+
+        {/* Trust badges */}
+        <div className={styles.badgesWrapper}>
+          <TrustBadges />
         </div>
       </div>
     </header>

@@ -3,9 +3,9 @@ import styles from './Navigation.module.css';
 
 const NAV_ITEMS = [
   { id: 'carbon-footprint', label: 'Carbon Footprint Estimator' },
-  { id: 'duplicate-detector', label: 'Duplicate Detector' },
-  { id: 'segregator', label: 'Segregator' },
   { id: 'wasteful-files', label: 'Wasteful Files Detector' },
+  { id: 'segregator', label: 'Segregator' },
+  { id: 'google-drive', label: 'Upload Google Drive' },
 ];
 
 export default function Navigation({ activeSection, onSectionChange }) {

@@ -116,7 +116,7 @@
 
 .input:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px rgba(74, 124, 89, 0.15);
+  box-shadow: 0 0 0 2px var(--color-focus-ring);
 }
 
 .input:disabled {
@@ -137,7 +137,7 @@
   padding: var(--space-sm) var(--space-lg);
   font-size: var(--text-base);
   font-weight: 500;
-  color: white;
+  color: var(--color-on-primary);
   background: var(--color-primary);
   border: none;
   border-radius: var(--radius-md);
@@ -148,7 +148,7 @@
 
 .submitButton:hover:not(:disabled) {
   background: var(--color-primary-hover);
-  box-shadow: 0 2px 6px rgba(74, 124, 89, 0.25);
+  box-shadow: 0 2px 6px var(--color-focus-ring);
 }
 
 .submitButton:disabled {
@@ -188,7 +188,7 @@
 
 .select:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px rgba(74, 124, 89, 0.15);
+  box-shadow: 0 0 0 2px var(--color-focus-ring);
 }
 
 .select:disabled {
