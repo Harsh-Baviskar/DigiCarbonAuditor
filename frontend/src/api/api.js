@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Real API client for Digital Carbon Auditor backend
  * Connects to Flask backend at the configured API URL
  */
@@ -125,6 +125,35 @@ function createSuggestedActions(result) {
 }
 
 /**
+ * Calls the backend /calculate endpoint via GET for folder paths or numeric sizes
+ * @param {string} pathOrSize - Folder path or numeric size in GB
+ * @param {string} region - Region for carbon intensity (default: IN-WE)
+ * @returns {Promise<object>} Calculation result
+ */
+async function callBackendCalculateViaGet(pathOrSize, region = 'IN-WE') {
+  const numValue = parseFloat(pathOrSize);
+  
+  let url = `${API_BASE_URL}/calculate?region=${encodeURIComponent(region)}`;
+  
+  if (!isNaN(numValue) && numValue > 0) {
+    // It's a numeric storage size in GB
+    url += `&data_size=${numValue}`;
+  } else {
+    // It's a folder path
+    url += `&path=${encodeURIComponent(pathOrSize)}`;
+  }
+  
+  const response = await fetch(url);
+  
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.detail || `Backend error: ${response.statusText}`);
+  }
+  
+  return response.json();
+}
+
+/**
  * Scanning by accepting a storage size or file upload
  * Integrates with the backend to calculate carbon emissions
  * @param {string|File} pathOrFile - Path string or File object for upload
@@ -139,32 +168,43 @@ export async function startScan(pathOrFile, region = 'IN-WE') {
     if (pathOrFile instanceof File) {
       result = await callBackendUpload(pathOrFile, region);
     } else {
-      // Check if it's a numeric storage size or a folder name
-      const numValue = parseFloat(pathOrFile);
-      if (!isNaN(numValue) && numValue > 0) {
-        // It's a numeric storage size in GB
-        const storageTb = numValue / 1024; // Convert GB to TB
-        result = await callBackendCalculate(storageTb, region);
-      } else {
-        // It's a folder name - pass it directly to backend for estimation
-        result = await callBackendCalculate(pathOrFile, region);
-      }
+      // Use GET endpoint for folder paths and numeric sizes
+      result = await callBackendCalculateViaGet(pathOrFile, region);
     }
 
     console.log('Backend response:', result);
     console.log('Backend response keys:', Object.keys(result));
-    console.log('Backend carbon values:', {
+
+    // Normalize response from different backend endpoints
+    // GET endpoint returns: carbon_footprint_kg, data_size_gb
+    // POST endpoint returns: energy_kwh_per_year, carbon_kg_per_year, etc.
+    const normalizedResult = {
+      // From POST endpoint
+      storage_tb: result.storage_tb,
       energy_kwh_per_year: result.energy_kwh_per_year,
       carbon_kg_per_year: result.carbon_kg_per_year,
       carbon_cost_estimate: result.carbon_cost_estimate,
-      types: {
-        energy: typeof result.energy_kwh_per_year,
-        carbon: typeof result.carbon_kg_per_year,
-        cost: typeof result.carbon_cost_estimate,
-      }
+      
+      // From GET endpoint (convert to match POST format)
+      carbon_footprint_kg: result.carbon_footprint_kg,
+      data_size_gb: result.data_size_gb,
+    };
+
+    // Calculate missing fields based on available data
+    if (normalizedResult.carbon_kg_per_year === undefined && normalizedResult.carbon_footprint_kg !== undefined) {
+      normalizedResult.carbon_kg_per_year = normalizedResult.carbon_footprint_kg;
+      normalizedResult.energy_kwh_per_year = normalizedResult.carbon_footprint_kg * 0.5;
+      normalizedResult.carbon_cost_estimate = normalizedResult.carbon_footprint_kg * 0.05;
+      normalizedResult.storage_tb = (normalizedResult.data_size_gb || 0) / 1024;
+    }
+
+    console.log('Normalized carbon values:', {
+      energy_kwh_per_year: normalizedResult.energy_kwh_per_year,
+      carbon_kg_per_year: normalizedResult.carbon_kg_per_year,
+      carbon_cost_estimate: normalizedResult.carbon_cost_estimate,
     });
 
-    const totalBytes = (result.storage_tb || 0) * 1024 * 1024 * 1024 * 1024;
+    const totalBytes = (normalizedResult.storage_tb || (normalizedResult.data_size_gb || 0) / 1024) * 1024 * 1024 * 1024 * 1024;
     const categoryBreakdown = result.category_breakdown || {};
 
     // Transform backend response to match frontend expectations
@@ -182,12 +222,12 @@ export async function startScan(pathOrFile, region = 'IN-WE') {
         byFileType: transformCategoryBreakdown(categoryBreakdown, totalBytes),
         byFolderDuplication: [], // Not provided by backend
       },
-      suggestedActions: createSuggestedActions(result),
+      suggestedActions: createSuggestedActions(normalizedResult),
       duplicateGroups: [], // Not provided by backend
       // Carbon calculation data - ensure proper number conversion
-      energyKwhPerYear: Number(result.energy_kwh_per_year ?? 0),
-      carbonKgPerYear: Number(result.carbon_kg_per_year ?? 0),
-      carbonCostEstimate: Number(result.carbon_cost_estimate ?? 0),
+      energyKwhPerYear: Number(normalizedResult.energy_kwh_per_year ?? 0),
+      carbonKgPerYear: Number(normalizedResult.carbon_kg_per_year ?? 0),
+      carbonCostEstimate: Number(normalizedResult.carbon_cost_estimate ?? 0),
     };
 
     console.log('Transformed result:', transformedResult);

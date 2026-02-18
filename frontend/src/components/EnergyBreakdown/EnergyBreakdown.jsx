@@ -68,9 +68,9 @@ export default function EnergyBreakdown({ result }) {
       {/* Impact Severity */}
       <div className={`${styles.severityCard} ${styles[`severity-${severity}`]}`}>
         <h3 className={styles.severityTitle}>
-          {severity === 'low' && 'Γ£à Low Carbon Footprint'}
-          {severity === 'medium' && 'ΓÜá∩╕Å Medium Carbon Footprint'}
-          {severity === 'high' && 'Γ¢ö High Carbon Footprint'}
+          {severity === 'low' && ' Low Carbon Footprint'}
+          {severity === 'medium' && ' Medium Carbon Footprint'}
+          {severity === 'high' && ' High Carbon Footprint'}
         </h3>
         <p className={styles.severityText}>
           {severity === 'low' && 'Your data storage has a relatively low environmental impact. Consider these optional optimizations:'}

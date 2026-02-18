@@ -18,6 +18,7 @@ import math
 
 from app.modules.intelligent_usage.report import generate_intelligent_usage_report
 from app.storage_scanner import scan_folder
+from app.wasteDetect import scan_folder_for_waste, delete_duplicate_files
 
 app = Flask(__name__)
 CORS(app)
@@ -108,20 +109,30 @@ def calculate():
         # Handle GET request (existing logic)
         data_size = request.args.get("data_size")
         path = request.args.get("path")
+        region = request.args.get("region", "IN-WE")
         
         if not data_size and not path:
             return jsonify({"detail": "Either 'data_size' (in GB) or 'path' parameter is required."}), 400
         
         try:
             if data_size:
-                # Direct calculation from data size
+                # Direct calculation from data size (in GB)
                 size_gb = float(data_size)
                 if size_gb < 0:
                     return jsonify({"detail": "data_size must be >= 0."}), 400
-                carbon_footprint = size_gb * 0.02  # 0.02 kg CO2 per GB per year
+                
+                # Calculate carbon footprint: 0.02 kg CO2 per GB per year
+                carbon_kg_per_year = size_gb * 0.02
+                storage_tb = size_gb / 1024
+                
                 return jsonify({
-                    "carbon_footprint_kg": round(carbon_footprint, 2),
-                    "data_size_gb": size_gb,
+                    "carbon_footprint_kg": round(carbon_kg_per_year, 2),
+                    "carbon_kg_per_year": round(carbon_kg_per_year, 2),
+                    "energy_kwh_per_year": round(carbon_kg_per_year * 0.5, 2),
+                    "carbon_cost_estimate": round(carbon_kg_per_year * 0.05, 2),
+                    "data_size_gb": round(size_gb, 2),
+                    "storage_tb": round(storage_tb, 6),
+                    "region": region,
                     "calculation_method": "direct"
                 })
             else:
@@ -132,14 +143,33 @@ def calculate():
                     return jsonify({"detail": f"Path is not a directory: {path}"}), 400
                 
                 total_size = 0
-                for root, dirs, files in os.walk(path):
-                    total_size += sum(os.path.getsize(os.path.join(root, file)) for file in files)
+                file_count = 0
+                try:
+                    for root, dirs, files in os.walk(path):
+                        for file in files:
+                            try:
+                                file_path = os.path.join(root, file)
+                                total_size += os.path.getsize(file_path)
+                                file_count += 1
+                            except (OSError, FileNotFoundError):
+                                # Skip files we can't access
+                                continue
+                except (PermissionError, OSError) as e:
+                    return jsonify({"detail": f"Permission denied or error accessing path: {str(e)}"}), 400
                 
                 size_gb = total_size / (1024 ** 3)  # Convert bytes to GB
-                carbon_footprint = size_gb * 0.02  # 0.02 kg CO2 per GB per year
+                carbon_kg_per_year = size_gb * 0.02  # 0.02 kg CO2 per GB per year
+                storage_tb = size_gb / 1024
+                
                 return jsonify({
-                    "carbon_footprint_kg": round(carbon_footprint, 2),
+                    "carbon_footprint_kg": round(carbon_kg_per_year, 2),
+                    "carbon_kg_per_year": round(carbon_kg_per_year, 2),
+                    "energy_kwh_per_year": round(carbon_kg_per_year * 0.5, 2),
+                    "carbon_cost_estimate": round(carbon_kg_per_year * 0.05, 2),
                     "data_size_gb": round(size_gb, 2),
+                    "storage_tb": round(storage_tb, 6),
+                    "region": region,
+                    "files_scanned": file_count,
                     "calculation_method": "folder_scan"
                 })
         except ValueError as exc:
@@ -330,6 +360,82 @@ def generate_mock_intelligent_report(size_gb, threshold_days, file_count=None):
         "category_breakdown": category_breakdown,
         "recommendations": recommendations
     })
+
+
+@app.route("/waste-detect", methods=['POST'])
+def waste_detect():
+    """Scan folder for wasteful files: duplicates, old files, and system files."""
+    try:
+        # Get JSON data with better error handling
+        data = request.get_json(silent=True)
+        
+        if data is None:
+            return jsonify({
+                "detail": "Request body must be JSON with Content-Type: application/json",
+                "scanStatus": "error"
+            }), 400
+        
+        if not isinstance(data, dict):
+            return jsonify({
+                "detail": "Request body must be a JSON object",
+                "scanStatus": "error"
+            }), 400
+        
+        folder_path = data.get('path', '').strip()
+        
+        if not folder_path:
+            return jsonify({
+                "detail": "Path is required and cannot be empty",
+                "scanStatus": "error"
+            }), 400
+        
+        if not os.path.exists(folder_path):
+            return jsonify({
+                "detail": f"Path does not exist: {folder_path}",
+                "scanStatus": "error"
+            }), 404
+        
+        if not os.path.isdir(folder_path):
+            return jsonify({
+                "detail": f"Path is not a directory: {folder_path}",
+                "scanStatus": "error"
+            }), 400
+        
+        # Scan the folder
+        results = scan_folder_for_waste(folder_path)
+        return jsonify(results)
+        
+    except Exception as e:
+        print(f"Error in /waste-detect: {str(e)}")
+        return jsonify({
+            "detail": f"Error during scan: {str(e)}", 
+            "scanStatus": "error"
+        }), 500
+
+
+@app.route("/waste-detect/delete-duplicates", methods=['POST'])
+def delete_duplicates():
+    """Delete selected duplicate files with validation and verification."""
+    try:
+        data = request.get_json()
+        if not data or 'files' not in data:
+            return jsonify({"detail": "JSON body with 'files' list is required."}), 400
+        
+        file_paths = data.get('files')
+        
+        if not isinstance(file_paths, list) or len(file_paths) == 0:
+            return jsonify({"detail": "Files list must not be empty."}), 400
+        
+        # Validate that all paths are strings
+        if not all(isinstance(p, str) for p in file_paths):
+            return jsonify({"detail": "All file paths must be strings."}), 400
+        
+        # Delete the selected files
+        results = delete_duplicate_files(file_paths)
+        return jsonify(results)
+        
+    except Exception as e:
+        return jsonify({"detail": f"Error during deletion: {str(e)}", "status": "error"}), 500
 
 
 @app.route("/select-folder")

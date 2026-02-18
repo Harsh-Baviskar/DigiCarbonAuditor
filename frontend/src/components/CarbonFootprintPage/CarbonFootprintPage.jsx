@@ -89,17 +89,11 @@ export default function CarbonFootprintPage() {
           </section>
 
           <div className={styles.insightGrid}>
-            <section className={styles.contributorsSection} aria-label="Top contributors">
-              <TopContributors topContributors={result.topContributors} />
-            </section>
             <section className={styles.actionsSection} aria-label="Suggested actions">
               <SuggestedActions suggestedActions={result.suggestedActions} />
             </section>
           </div>
 
-          <section className={styles.duplicatesSection} aria-label="Duplicate files detail">
-            <DuplicateFilesView duplicateGroups={result.duplicateGroups} />
-          </section>
         </div>
       )}
     </div>

@@ -48,7 +48,7 @@ export default function CarbonImpact({ result }) {
         <div className={styles.card}>
           <div className={styles.cardHeader}>
             <h3 className={styles.cardTitle}>CO2 Emissions</h3>
-            <span className={styles.icon}>≡ƒîì</span>
+            <span className={styles.icon}>🏭</span>
           </div>
           <div className={styles.value}>{carbonKg.toLocaleString('en-US', { maximumFractionDigits: 1 })} kg</div>
           <div className={styles.subtext}>per year</div>
@@ -69,7 +69,7 @@ export default function CarbonImpact({ result }) {
         <div className={styles.card}>
           <div className={styles.cardHeader}>
             <h3 className={styles.cardTitle}>Energy Consumption</h3>
-            <span className={styles.icon}>ΓÜí</span>
+            <span className={styles.icon}>⚡</span>
           </div>
           <div className={styles.value}>{energyKwh.toLocaleString('en-US', { maximumFractionDigits: 1 })} kWh</div>
           <div className={styles.subtext}>per year</div>
@@ -90,7 +90,7 @@ export default function CarbonImpact({ result }) {
         <div className={styles.card}>
           <div className={styles.cardHeader}>
             <h3 className={styles.cardTitle}>Carbon Cost</h3>
-            <span className={styles.icon}>≡ƒÆ░</span>
+            <span className={styles.icon}>💲</span>
           </div>
           <div className={styles.value}>${costEstimate.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
           <div className={styles.subtext}>per year (estimated)</div>
@@ -112,10 +112,10 @@ export default function CarbonImpact({ result }) {
       <div className={styles.recommendations}>
         <h3 className={styles.recTitle}>Recommendations to Reduce Impact</h3>
         <ul className={styles.recList}>
-          <li>≡ƒùæ∩╕Å Delete unnecessary files: Reducing storage by 10% saves ~{(carbonKg * 0.1).toFixed(1)} kg CO2/year</li>
-          <li>ΓÖ╗∩╕Å Archive old data: Move infrequently accessed data to cold storage</li>
-          <li>≡ƒî▒ Use renewable energy provider: Some cloud providers offer 100% renewable options</li>
-          <li>≡ƒôè Monitor regularly: Track storage growth to prevent unnecessary expansion</li>
+          <li> Delete unnecessary files: Reducing storage by 10% saves ~{(carbonKg * 0.1).toFixed(1)} kg CO2/year</li>
+          <li>Archive old data: Move infrequently accessed data to cold storage</li>
+          <li> Use renewable energy provider: Some cloud providers offer 100% renewable options</li>
+          <li> Monitor regularly: Track storage growth to prevent unnecessary expansion</li>
         </ul>
       </div>
     </section>

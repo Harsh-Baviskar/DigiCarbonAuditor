@@ -7,11 +7,11 @@
 const POINTS = [
   {
     title: 'Storage optimization',
-    description: '30ΓÇô50% of organizational storage is redundant. Free space without adding hardware.',
+    description: '30% of organizational storage is redundant. Free space without adding hardware.',
   },
   {
     title: 'Carbon reduction',
-    description: 'Data centers use 1ΓÇô2% of global electricity. Less waste = lower emissions.',
+    description: 'Data centers use 12% of global electricity. Less waste = lower emissions.',
   },
   {
     title: 'Cost and efficiency',

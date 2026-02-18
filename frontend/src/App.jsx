@@ -4,7 +4,6 @@ import Layout from './components/Layout/Layout';
 import CarbonFootprintPage from './components/CarbonFootprintPage/CarbonFootprintPage';
 import SegregatorPage from './components/SegregatorPage/SegregatorPage';
 import WastefulFilesPage from './components/WastefulFilesPage/WastefulFilesPage';
-import GoogleDrivePage from './components/GoogleDrivePage/GoogleDrivePage';
 import './App.css';
 
 /**
@@ -12,7 +11,7 @@ import './App.css';
  *
  * Features:
  * - Carbon Footprint Estimator: Calculate storage carbon emissions
- * - Segregator: Organize files by type (coming soon)
+ * - Segregator: Organize files by type
  * - Wasteful Files Detector: Find duplicate and wasteful files
  */
 export default function App() {
@@ -26,8 +25,6 @@ export default function App() {
         return <SegregatorPage />;
       case 'wasteful-files':
         return <WastefulFilesPage />;
-      case 'google-drive':
-        return <GoogleDrivePage />;
       default:
         return <CarbonFootprintPage />;
     }
@@ -41,4 +38,5 @@ export default function App() {
     </ThemeProvider>
   );
 }
+
 
