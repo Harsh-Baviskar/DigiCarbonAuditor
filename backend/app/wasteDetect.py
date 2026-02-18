@@ -27,6 +27,43 @@ SYSTEM_DIRECTORIES = {
 }
 
 
+def is_safe_path(file_path, base_directory):
+    """
+    Validate that a file path is safe to process.
+    
+    Security checks:
+    1. Reject symlinks (both files and directories) to prevent directory traversal
+    2. Ensure the real path is within the base directory (prevents ../ escaping)
+    3. Compare absolute real paths to eliminate path normalization bypasses
+    
+    Args:
+        file_path: Path to validate
+        base_directory: Base directory that scanning is restricted to (already real path)
+    
+    Returns:
+        True if safe, False if unsafe
+    """
+    try:
+        # Check if the file/directory is a symlink - reject all symlinks
+        if os.path.islink(file_path):
+            return False
+        
+        # Resolve to real path to detect any directory traversal attempts
+        real_file_path = os.path.realpath(file_path)
+        
+        # Ensure the real path starts with base directory
+        # Add os.sep to avoid prefix matching issues (e.g., /base vs /base2)
+        if not real_file_path.startswith(os.path.realpath(base_directory) + os.sep):
+            # Also check if it's exactly the base directory itself
+            if real_file_path != os.path.realpath(base_directory):
+                return False
+        
+        return True
+    except (OSError, ValueError):
+        # If path resolution fails, reject it
+        return False
+
+
 def is_system_file(file_path):
     """Check if file is a system file based on extension and path."""
     file_lower = file_path.lower()
@@ -81,6 +118,8 @@ def scan_folder_for_waste(folder_path):
     Uses efficient two-pass approach:
     1. First pass: Group files by size and age
     2. Second pass: Hash only files in same-size groups (duplicates)
+    
+    SECURITY: Validates all paths to prevent directory traversal attacks
     """
     results = {
         "scanStatus": "success",
@@ -118,6 +157,10 @@ def scan_folder_for_waste(folder_path):
         return results
     
     try:
+        # SECURITY: Resolve base directory to real path once at start
+        # This prevents any directory traversal from affecting the base check
+        base_real_path = os.path.realpath(folder_path)
+        
         current_time = time.time()
         age_threshold_seconds = 180 * 24 * 3600  # 180 days
         
@@ -126,13 +169,23 @@ def scan_folder_for_waste(folder_path):
         old_files = []
         system_files = []
         
-        for root, dirs, files in os.walk(folder_path):
-            # Skip system directories efficiently
-            dirs[:] = [d for d in dirs if not d.startswith('.') and 
-                      d.lower() not in SYSTEM_DIRECTORIES]
+        for root, dirs, files in os.walk(base_real_path):
+            # SECURITY: Filter out symlink directories to prevent traversal
+            # This prevents os.walk from descending into symlinked directories
+            dirs[:] = [d for d in dirs if (
+                not d.startswith('.') and 
+                d.lower() not in SYSTEM_DIRECTORIES and
+                not os.path.islink(os.path.join(root, d))  # Reject symlinks
+            )]
             
             for file in files:
                 file_path = os.path.join(root, file)
+                
+                # SECURITY: Validate file path before processing
+                # This catches any symlinks or path traversal attempts
+                if not is_safe_path(file_path, base_real_path):
+                    results["summary"]["errorCount"] += 1
+                    continue
                 
                 # Error handling - continue on any file access issue
                 try:
@@ -263,6 +316,8 @@ def delete_duplicate_files(file_paths, keep_index=0):
     Delete specific duplicate files from the provided list.
     Ensures files are actually deleted and verifies deletion.
     
+    SECURITY: Validates all paths before deletion to prevent unauthorized access
+    
     Args:
         file_paths: List of file paths to delete (specific duplicates to remove)
         keep_index: Deprecated parameter, kept for backward compatibility
@@ -293,6 +348,16 @@ def delete_duplicate_files(file_paths, keep_index=0):
                     "path": file_path,
                     "status": "not_found",
                     "error": "File does not exist"
+                })
+                continue
+            
+            # SECURITY: Validate path before deletion to prevent unauthorized removal
+            if os.path.islink(file_path):
+                results["failedCount"] += 1
+                results["deletions"].append({
+                    "path": file_path,
+                    "status": "blocked",
+                    "error": "Symlinks cannot be deleted (security policy)"
                 })
                 continue
             
