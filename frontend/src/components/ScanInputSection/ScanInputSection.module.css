@@ -195,3 +195,16 @@
   opacity: 0.7;
   cursor: not-allowed;
 }
+.loadingIndicator {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  font-weight: normal;
+  font-style: italic;
+}
+
+.regionHint {
+  margin: var(--space-xs) 0 0;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  font-style: italic;
+}

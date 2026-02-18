@@ -1,5 +1,6 @@
-﻿import { useState } from 'react';
+﻿import { useState, useEffect } from 'react';
 import styles from './ScanInputSection.module.css';
+import { getCarbonIntensity } from '../../api/api';
 
 /**
  * ScanInputSection - Intuitive folder selection for non-technical users.
@@ -11,6 +12,46 @@ export default function ScanInputSection({ onScan, isScanning }) {
   const [region, setRegion] = useState('IN-WE');
   const [pathError, setPathError] = useState(null);
   const [selectingFolder, setSelectingFolder] = useState(false);
+  const [carbonIntensities, setCarbonIntensities] = useState({});
+  const [loadingIntensities, setLoadingIntensities] = useState(false);
+
+  // Region definitions
+  const regions = [
+    { code: 'IN-WE', name: 'India (West)', description: 'High carbon intensity' },
+    { code: 'IN-KA', name: 'India (Karnataka)', description: 'High carbon intensity' },
+    { code: 'IN-DL', name: 'India (Delhi)', description: 'High carbon intensity' },
+    { code: 'FR', name: 'France', description: 'Very low (nuclear)' },
+    { code: 'DE', name: 'Germany', description: 'Medium-high carbon intensity' },
+    { code: 'GB', name: 'Great Britain', description: 'Low carbon intensity' },
+    { code: 'NO', name: 'Norway', description: 'Very low (hydroelectric)' },
+    { code: 'US-VA', name: 'United States (Virginia)', description: 'Medium carbon intensity' },
+    { code: 'US-TX', name: 'United States (Texas)', description: 'Wind + gas mix' },
+    { code: 'US-CA', name: 'United States (California)', description: 'Lower carbon intensity' },
+    { code: 'US-NY', name: 'United States (New York)', description: 'Lower carbon intensity' },
+  ];
+
+  // Load real carbon intensity values on mount
+  useEffect(() => {
+    const loadCarbonIntensities = async () => {
+      setLoadingIntensities(true);
+      const intensities = {};
+      
+      for (const region of regions) {
+        try {
+          const intensity = await getCarbonIntensity(region.code);
+          intensities[region.code] = intensity;
+        } catch (error) {
+          console.warn(`Failed to load carbon intensity for ${region.code}:`, error);
+          intensities[region.code] = 500; // Default
+        }
+      }
+      
+      setCarbonIntensities(intensities);
+      setLoadingIntensities(false);
+    };
+
+    loadCarbonIntensities();
+  }, []);
 
   const handleInputChange = (e) => {
     setPath(e.target.value);
@@ -120,6 +161,7 @@ export default function ScanInputSection({ onScan, isScanning }) {
         <div className={styles.regionSection}>
           <label htmlFor="region-select" className={styles.label}>
             Region (for carbon intensity)
+            {loadingIntensities && <span className={styles.loadingIndicator}> — Loading real values...</span>}
           </label>
           <select
             id="region-select"
@@ -128,17 +170,19 @@ export default function ScanInputSection({ onScan, isScanning }) {
             disabled={isScanning}
             className={styles.select}
           >
-            <option value="IN-WE">India (West) - 447 gCO2/kWh</option>
-            <option value="IN-KA">India (Karnataka) - ~450 gCO2/kWh</option>
-            <option value="IN-DL">India (Delhi) - ~450 gCO2/kWh</option>
-            <option value="FR">France - 25 gCO2/kWh</option>
-            <option value="DE">Germany - ~380 gCO2/kWh</option>
-            <option value="GB">Great Britain - ~200 gCO2/kWh</option>
-            <option value="US-VA">United States (Virginia) - ~360 gCO2/kWh</option>
-            <option value="US-TX">United States (Texas) - ~380 gCO2/kWh</option>
-            <option value="US-CA">United States (California) - ~177 gCO2/kWh</option>
-            <option value="US-NY">United States (New York) - ~120 gCO2/kWh</option>
+            {regions.map(r => {
+              const intensity = carbonIntensities[r.code];
+              const intensityText = intensity !== undefined ? ` — ${intensity} gCO2/kWh` : ' — Loading...';
+              return (
+                <option key={r.code} value={r.code}>
+                  {r.name}{intensityText}
+                </option>
+              );
+            })}
           </select>
+          <p className={styles.regionHint}>
+            Real-time carbon intensity data from ElectricityMap API
+          </p>
         </div>
       </form>
     </section>

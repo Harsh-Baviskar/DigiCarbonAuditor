@@ -6,6 +6,7 @@ import StatusFeedback from '../StatusFeedback/StatusFeedback';
 import SummaryMetrics from '../SummaryMetrics/SummaryMetrics';
 import CarbonImpact from '../CarbonImpact/CarbonImpact';
 import EnergyBreakdown from '../EnergyBreakdown/EnergyBreakdown';
+import CalculationSource from '../CalculationSource/CalculationSource';
 import TopContributors from '../TopContributors/TopContributors';
 import SuggestedActions from '../SuggestedActions/SuggestedActions';
 import DuplicateFilesView from '../DuplicateFilesView/DuplicateFilesView';
@@ -86,6 +87,10 @@ export default function CarbonFootprintPage() {
 
           <section className={styles.energySection} aria-label="Energy breakdown">
             <EnergyBreakdown result={result} />
+          </section>
+
+          <section className={styles.sourceSection} aria-label="Calculation source and methodology">
+            <CalculationSource result={result} />
           </section>
 
           <div className={styles.insightGrid}>

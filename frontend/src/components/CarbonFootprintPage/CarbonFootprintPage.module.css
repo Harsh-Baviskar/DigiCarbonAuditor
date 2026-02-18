@@ -28,6 +28,32 @@
   margin-top: 2rem;
 }
 
+.summarySection {
+  margin-bottom: 2rem;
+}
+
+.carbonSection {
+  margin-bottom: 2rem;
+}
+
+.energySection {
+  margin-bottom: 2rem;
+}
+
+.sourceSection {
+  margin-bottom: 2rem;
+}
+
+.insightGrid {
+  display: grid;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.actionsSection {
+  width: 100%;
+}
+
 @media (max-width: 768px) {
   .page {
     padding: 1.5rem 0;

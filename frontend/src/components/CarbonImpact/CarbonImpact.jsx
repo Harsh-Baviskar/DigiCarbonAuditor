@@ -25,8 +25,10 @@ export default function CarbonImpact({ result }) {
   const energyKwh = result.energyKwhPerYear ?? 0;
   const costEstimate = result.carbonCostEstimate ?? 0;
   const storageTb = result.summary?.totalStorageBytes ? (result.summary.totalStorageBytes / (1024 ** 4)).toFixed(2) : 0;
+  const region = result.region || 'Unknown';
+  const carbonIntensity = result.carbonIntensity ?? 'N/A';
 
-  console.log('CarbonImpact - Parsed values:', { carbonKg, energyKwh, costEstimate, storageTb });
+  console.log('CarbonImpact - Parsed values:', { carbonKg, energyKwh, costEstimate, storageTb, region, carbonIntensity });
 
   // Calculate equivalent comparisons
   const carEmissions = (carbonKg / 4.6).toFixed(1); // Average car emits 4.6 kg CO2/gallon
@@ -42,6 +44,18 @@ export default function CarbonImpact({ result }) {
           label="How carbon impact is calculated"
         />
       </h2>
+
+      <div className={styles.regionInfo}>
+        <span className={styles.regionLabel}>Region:</span>
+        <span className={styles.regionValue}>{region}</span>
+        <span className={styles.separator}>•</span>
+        <span className={styles.regionLabel}>Carbon Intensity:</span>
+        <span className={styles.regionValue}>{typeof carbonIntensity === 'number' ? `${carbonIntensity} gCO2/kWh` : carbonIntensity}</span>
+        <InfoTooltip
+          content="Real-time carbon intensity data from ElectricityMap API based on your selected region's electricity grid composition."
+          label="Data source"
+        />
+      </div>
 
       <div className={styles.grid}>
         {/* CO2 Emissions Card */}

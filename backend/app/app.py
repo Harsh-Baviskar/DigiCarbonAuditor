@@ -15,13 +15,57 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 import os
 import math
+import requests
 
 from app.modules.intelligent_usage.report import generate_intelligent_usage_report
 from app.storage_scanner import scan_folder
 from app.wasteDetect import scan_folder_for_waste, delete_duplicate_files
 
+# Load API key
+API_KEY = os.getenv("ELECTRICITYMAP_API_KEY")
+
 app = Flask(__name__)
 CORS(app)
+
+
+def get_carbon_intensity(region="IN-WE"):
+    """
+    Fetch real carbon intensity from ElectricityMap API.
+    Returns gCO2/kWh for the region, or 500 as fallback if unavailable.
+    
+    Args:
+        region: ISO region code (e.g., 'IN-WE', 'US-CA', 'DE')
+    
+    Returns:
+        Carbon intensity in gCO2/kWh (as float)
+    """
+    if not API_KEY:
+        print("Warning: ELECTRICITYMAP_API_KEY not set. Using default carbon intensity.")
+        return 500  # Default global average
+    
+    try:
+        url = f"https://api.electricitymaps.com/v3/carbon-intensity/latest?zone={region}"
+        headers = {"auth-token": API_KEY}
+        
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
+        
+        data = response.json()
+        carbon_intensity = data.get("carbonIntensity")
+        
+        if carbon_intensity is None:
+            print(f"Warning: No carbonIntensity in response for {region}. Using default 500 gCO2/kWh")
+            return 500
+        
+        print(f"Fetched carbon intensity for {region}: {carbon_intensity} gCO2/kWh")
+        return carbon_intensity
+    
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching carbon intensity for {region}: {str(e)}")
+        return 500  # Default fallback value in gCO2/kWh
+    except Exception as e:
+        print(f"Unexpected error getting carbon intensity: {str(e)}")
+        return 500
 
 
 def estimate_folder_size(folder_name):
@@ -72,7 +116,7 @@ def estimate_folder_size(folder_name):
 
 @app.route("/calculate", methods=['GET', 'POST'])
 def calculate():
-    """Calculate carbon footprint based on data size or folder path."""
+    """Calculate carbon footprint based on data size or folder path using real regional data."""
     if request.method == 'POST':
         # Handle JSON POST request
         data = request.get_json()
@@ -90,23 +134,36 @@ def calculate():
             if storage_tb < 0:
                 return jsonify({"detail": "storage_tb must be >= 0."}), 400
             
-            # Calculate carbon footprint: 0.02 kg CO2 per GB per year
-            carbon_kg_per_year = storage_tb * 1024 * 0.02  # Convert TB to GB first
+            storage_gb = storage_tb * 1024
+            
+            # Get real carbon intensity from ElectricityMap API
+            carbon_intensity_gco2_per_kwh = get_carbon_intensity(region)
+            
+            # Data center energy consumption: ~1.5 kWh per GB per year (industry average)
+            energy_kwh_per_year = storage_gb * 1.5
+            
+            # Calculate carbon emissions in kg CO2 per year
+            carbon_kg_per_year = (energy_kwh_per_year * carbon_intensity_gco2_per_kwh) / 1000
+            
+            # Cost estimate: $0.12 per kg CO2 (carbon offset price average)
+            carbon_cost_estimate = carbon_kg_per_year * 0.12
             
             result = {
                 "storage_tb": storage_tb,
+                "storage_gb": storage_gb,
                 "region": region,
-                "energy_kwh_per_year": carbon_kg_per_year * 0.5,
-                "carbon_kg_per_year": carbon_kg_per_year,
-                "carbon_cost_estimate": carbon_kg_per_year * 0.05,
-                "calculation_method": "direct_input"
+                "carbon_intensity_gco2_per_kwh": carbon_intensity_gco2_per_kwh,
+                "energy_kwh_per_year": round(energy_kwh_per_year, 2),
+                "carbon_kg_per_year": round(carbon_kg_per_year, 2),
+                "carbon_cost_estimate": round(carbon_cost_estimate, 2),
+                "calculation_method": "api_based_with_region"
             }
             return jsonify(result)
         except ValueError:
             return jsonify({"detail": "Invalid storage_tb value."}), 400
     
     else:
-        # Handle GET request (existing logic)
+        # Handle GET request
         data_size = request.args.get("data_size")
         path = request.args.get("path")
         region = request.args.get("region", "IN-WE")
@@ -121,19 +178,30 @@ def calculate():
                 if size_gb < 0:
                     return jsonify({"detail": "data_size must be >= 0."}), 400
                 
-                # Calculate carbon footprint: 0.02 kg CO2 per GB per year
-                carbon_kg_per_year = size_gb * 0.02
+                # Get real carbon intensity from ElectricityMap API
+                carbon_intensity_gco2_per_kwh = get_carbon_intensity(region)
+                
+                # Data center energy consumption: ~1.5 kWh per GB per year
+                energy_kwh_per_year = size_gb * 1.5
+                
+                # Calculate carbon emissions in kg CO2 per year
+                carbon_kg_per_year = (energy_kwh_per_year * carbon_intensity_gco2_per_kwh) / 1000
+                
+                # Cost estimate
+                carbon_cost_estimate = carbon_kg_per_year * 0.12
+                
                 storage_tb = size_gb / 1024
                 
                 return jsonify({
                     "carbon_footprint_kg": round(carbon_kg_per_year, 2),
                     "carbon_kg_per_year": round(carbon_kg_per_year, 2),
-                    "energy_kwh_per_year": round(carbon_kg_per_year * 0.5, 2),
-                    "carbon_cost_estimate": round(carbon_kg_per_year * 0.05, 2),
+                    "energy_kwh_per_year": round(energy_kwh_per_year, 2),
+                    "carbon_cost_estimate": round(carbon_cost_estimate, 2),
                     "data_size_gb": round(size_gb, 2),
                     "storage_tb": round(storage_tb, 6),
                     "region": region,
-                    "calculation_method": "direct"
+                    "carbon_intensity_gco2_per_kwh": carbon_intensity_gco2_per_kwh,
+                    "calculation_method": "api_based_with_region"
                 })
             else:
                 # Calculate from folder path
@@ -152,25 +220,37 @@ def calculate():
                                 total_size += os.path.getsize(file_path)
                                 file_count += 1
                             except (OSError, FileNotFoundError):
-                                # Skip files we can't access
                                 continue
                 except (PermissionError, OSError) as e:
                     return jsonify({"detail": f"Permission denied or error accessing path: {str(e)}"}), 400
                 
-                size_gb = total_size / (1024 ** 3)  # Convert bytes to GB
-                carbon_kg_per_year = size_gb * 0.02  # 0.02 kg CO2 per GB per year
+                size_gb = total_size / (1024 ** 3)
+                
+                # Get real carbon intensity from ElectricityMap API
+                carbon_intensity_gco2_per_kwh = get_carbon_intensity(region)
+                
+                # Data center energy consumption: ~1.5 kWh per GB per year
+                energy_kwh_per_year = size_gb * 1.5
+                
+                # Calculate carbon emissions in kg CO2 per year
+                carbon_kg_per_year = (energy_kwh_per_year * carbon_intensity_gco2_per_kwh) / 1000
+                
+                # Cost estimate
+                carbon_cost_estimate = carbon_kg_per_year * 0.12
+                
                 storage_tb = size_gb / 1024
                 
                 return jsonify({
                     "carbon_footprint_kg": round(carbon_kg_per_year, 2),
                     "carbon_kg_per_year": round(carbon_kg_per_year, 2),
-                    "energy_kwh_per_year": round(carbon_kg_per_year * 0.5, 2),
-                    "carbon_cost_estimate": round(carbon_kg_per_year * 0.05, 2),
+                    "energy_kwh_per_year": round(energy_kwh_per_year, 2),
+                    "carbon_cost_estimate": round(carbon_cost_estimate, 2),
                     "data_size_gb": round(size_gb, 2),
                     "storage_tb": round(storage_tb, 6),
                     "region": region,
+                    "carbon_intensity_gco2_per_kwh": carbon_intensity_gco2_per_kwh,
                     "files_scanned": file_count,
-                    "calculation_method": "folder_scan"
+                    "calculation_method": "api_based_with_region"
                 })
         except ValueError as exc:
             return jsonify({"detail": f"Invalid number format: {exc}"}), 400

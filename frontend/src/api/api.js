@@ -175,43 +175,38 @@ export async function startScan(pathOrFile, region = 'IN-WE') {
     console.log('Backend response:', result);
     console.log('Backend response keys:', Object.keys(result));
 
-    // Normalize response from different backend endpoints
-    // GET endpoint returns: carbon_footprint_kg, data_size_gb
-    // POST endpoint returns: energy_kwh_per_year, carbon_kg_per_year, etc.
+    // Backend now returns real API-based calculations with ElectricityMap carbon intensity
+    // Response includes: carbon_intensity_gco2_per_kwh, energy_kwh_per_year, carbon_kg_per_year, etc.
     const normalizedResult = {
-      // From POST endpoint
-      storage_tb: result.storage_tb,
+      // From backend (either GET or POST endpoint)
+      storage_tb: result.storage_tb || (result.data_size_gb || 0) / 1024,
+      storage_gb: result.storage_gb || result.data_size_gb,
       energy_kwh_per_year: result.energy_kwh_per_year,
-      carbon_kg_per_year: result.carbon_kg_per_year,
+      carbon_kg_per_year: result.carbon_kg_per_year || result.carbon_footprint_kg,
       carbon_cost_estimate: result.carbon_cost_estimate,
-      
-      // From GET endpoint (convert to match POST format)
-      carbon_footprint_kg: result.carbon_footprint_kg,
-      data_size_gb: result.data_size_gb,
+      region: result.region,
+      carbon_intensity_gco2_per_kwh: result.carbon_intensity_gco2_per_kwh,
+      calculation_method: result.calculation_method
     };
 
-    // Calculate missing fields based on available data
-    if (normalizedResult.carbon_kg_per_year === undefined && normalizedResult.carbon_footprint_kg !== undefined) {
-      normalizedResult.carbon_kg_per_year = normalizedResult.carbon_footprint_kg;
-      normalizedResult.energy_kwh_per_year = normalizedResult.carbon_footprint_kg * 0.5;
-      normalizedResult.carbon_cost_estimate = normalizedResult.carbon_footprint_kg * 0.05;
-      normalizedResult.storage_tb = (normalizedResult.data_size_gb || 0) / 1024;
-    }
-
-    console.log('Normalized carbon values:', {
+    console.log('Real carbon values from backend (ElectricityMap API):', {
+      region: normalizedResult.region,
+      carbon_intensity_gco2_per_kwh: normalizedResult.carbon_intensity_gco2_per_kwh,
       energy_kwh_per_year: normalizedResult.energy_kwh_per_year,
       carbon_kg_per_year: normalizedResult.carbon_kg_per_year,
       carbon_cost_estimate: normalizedResult.carbon_cost_estimate,
+      calculation_method: normalizedResult.calculation_method
     });
 
-    const totalBytes = (normalizedResult.storage_tb || (normalizedResult.data_size_gb || 0) / 1024) * 1024 * 1024 * 1024 * 1024;
+    const totalBytes = (normalizedResult.storage_tb || 0) * 1024 * 1024 * 1024 * 1024;
     const categoryBreakdown = result.category_breakdown || {};
 
     // Transform backend response to match frontend expectations
     const transformedResult = {
       success: true,
       scannedPath: pathOrFile instanceof File ? pathOrFile.name : pathOrFile,
-      region: region,
+      region: normalizedResult.region,
+      carbonIntensity: normalizedResult.carbon_intensity_gco2_per_kwh,
       summary: {
         totalFiles: result.estimated_files || result.files_scanned || 0,
         totalStorageBytes: totalBytes,
@@ -224,7 +219,7 @@ export async function startScan(pathOrFile, region = 'IN-WE') {
       },
       suggestedActions: createSuggestedActions(normalizedResult),
       duplicateGroups: [], // Not provided by backend
-      // Carbon calculation data - ensure proper number conversion
+      // Carbon calculation data from ElectricityMap API - ensure proper number conversion
       energyKwhPerYear: Number(normalizedResult.energy_kwh_per_year ?? 0),
       carbonKgPerYear: Number(normalizedResult.carbon_kg_per_year ?? 0),
       carbonCostEstimate: Number(normalizedResult.carbon_cost_estimate ?? 0),
@@ -248,4 +243,26 @@ export async function startScan(pathOrFile, region = 'IN-WE') {
   }
 }
 
-export { API_BASE_URL };
+/**
+ * Fetches carbon intensity for a specific region
+ * @param {string} region - ISO region code (e.g., 'IN-WE', 'US-CA', 'FR')
+ * @returns {Promise<number>} Carbon intensity in gCO2/kWh
+ */
+export async function getCarbonIntensity(region = 'IN-WE') {
+  try {
+    // Use a small data size (0.1 GB) to fetch minimal data but get the carbon intensity
+    const response = await fetch(`${API_BASE_URL}/calculate?data_size=0.1&region=${encodeURIComponent(region)}`);
+    
+    if (!response.ok) {
+      console.warn(`Failed to fetch carbon intensity for ${region}, using default`);
+      return 500; // Default fallback
+    }
+    
+    const data = await response.json();
+    return data.carbon_intensity_gco2_per_kwh ?? 500;
+  } catch (error) {
+    console.warn(`Error fetching carbon intensity for ${region}:`, error);
+    return 500; // Default fallback
+  }
+}
+

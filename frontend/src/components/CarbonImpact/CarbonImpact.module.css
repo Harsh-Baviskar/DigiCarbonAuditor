@@ -17,6 +17,37 @@
   gap: var(--space-sm);
 }
 
+.regionInfo {
+  background: linear-gradient(135deg, var(--color-surface-soft) 0%, rgba(100, 200, 255, 0.05) 100%);
+  border-left: 3px solid var(--color-primary);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  font-size: var(--text-sm);
+}
+
+.regionLabel {
+  color: var(--color-text-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.regionValue {
+  color: var(--color-heading);
+  font-weight: 600;
+  font-family: var(--font-mono);
+}
+
+.separator {
+  color: var(--color-border);
+  margin: 0 var(--space-xs);
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
