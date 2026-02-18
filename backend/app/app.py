@@ -16,6 +16,7 @@ from flask_cors import CORS
 import os
 import math
 import requests
+from datetime import datetime
 
 from app.modules.intelligent_usage.report import generate_intelligent_usage_report
 from app.storage_scanner import scan_folder
@@ -487,8 +488,27 @@ def waste_detect():
                 "scanStatus": "error"
             }), 400
         
-        # Scan the folder
-        results = scan_folder_for_waste(folder_path)
+        # Optional: Set up progress callback if client wants it
+        # For now, we collect progress internally and return it in response
+        progress_updates = []
+        
+        def progress_callback(processed, total, percentage):
+            """Callback for progress updates during scan."""
+            progress_updates.append({
+                "processed": processed,
+                "total": total,
+                "percentage": percentage,
+                "timestamp": datetime.now().isoformat()
+            })
+        
+        # Scan the folder with progress callback
+        results = scan_folder_for_waste(folder_path, progress_callback=progress_callback)
+        
+        # Include progress history in response for debugging/monitoring (optional)
+        # Set includeProgressHistory query param to true to include all progress updates
+        if request.args.get('includeProgressHistory', '').lower() == 'true':
+            results["progressHistory"] = progress_updates
+        
         return jsonify(results)
         
     except Exception as e:

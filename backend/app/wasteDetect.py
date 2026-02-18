@@ -255,7 +255,45 @@ def get_file_age_days(file_path):
         return 0
 
 
-def scan_folder_for_waste(folder_path):
+def _count_files_quickly(folder_path, base_real_path):
+    """
+    Quick file count for progress tracking (no hashing).
+    Counts total files to be processed in main scan.
+    
+    Args:
+        folder_path: Path to scan
+        base_real_path: Real path of base directory
+    
+    Returns:
+        Total file count
+    """
+    total_files = 0
+    try:
+        for root, dirs, files in os.walk(base_real_path):
+            # Filter system directories like in main scan
+            dirs[:] = [d for d in dirs if (
+                not d.startswith('.') and 
+                d.lower() not in SYSTEM_DIRECTORIES and
+                not os.path.islink(os.path.join(root, d))
+            )]
+            
+            for file in files:
+                file_path = os.path.join(root, file)
+                
+                # Count only safe files
+                if is_safe_path(file_path, base_real_path):
+                    try:
+                        if os.path.exists(file_path):
+                            total_files += 1
+                    except (IOError, OSError):
+                        pass
+    except (IOError, OSError):
+        pass
+    
+    return max(1, total_files)  # Ensure at least 1 to avoid division by zero
+
+
+def scan_folder_for_waste(folder_path, progress_callback=None):
     """
     Scan a folder and identify wasteful files.
     Uses efficient two-pass approach:
@@ -263,11 +301,24 @@ def scan_folder_for_waste(folder_path):
     2. Second pass: Hash only files in same-size groups (duplicates)
     
     SECURITY: Validates all paths to prevent directory traversal attacks
+    
+    Args:
+        folder_path: Directory to scan
+        progress_callback: Optional callback function(processed, total, percentage) for progress tracking
+    
+    Returns:
+        Results dictionary with findings and progress metadata
     """
     results = {
         "scanStatus": "success",
         "scannedPath": folder_path,
         "scanTimestamp": datetime.now().isoformat(),
+        "progress": {
+            "total": 0,
+            "processed": 0,
+            "percentage": 0,
+            "stage": "initializing"
+        },
         "summary": {
             "totalFiles": 0,
             "totalSizeBytes": 0,
@@ -292,17 +343,24 @@ def scan_folder_for_waste(folder_path):
     if not os.path.exists(folder_path):
         results["scanStatus"] = "error"
         results["error"] = f"Path does not exist: {folder_path}"
+        results["progress"]["stage"] = "error"
         return results
     
     if not os.path.isdir(folder_path):
         results["scanStatus"] = "error"
         results["error"] = f"Path is not a directory: {folder_path}"
+        results["progress"]["stage"] = "error"
         return results
     
     try:
         # SECURITY: Resolve base directory to real path once at start
         # This prevents any directory traversal from affecting the base check
         base_real_path = os.path.realpath(folder_path)
+        
+        # PROGRESS: Pre-scan to count total files for progress percentage
+        results["progress"]["stage"] = "counting"
+        total_files = _count_files_quickly(folder_path, base_real_path)
+        results["progress"]["total"] = total_files
         
         current_time = time.time()
         age_threshold_seconds = 180 * 24 * 3600  # 180 days
@@ -311,6 +369,10 @@ def scan_folder_for_waste(folder_path):
         files_by_size = defaultdict(list)
         old_files = []
         system_files = []
+        
+        # PROGRESS: Update stage
+        results["progress"]["stage"] = "scanning"
+        processed_count = 0
         
         for root, dirs, files in os.walk(base_real_path):
             # SECURITY: Filter out symlink directories to prevent traversal
@@ -329,6 +391,19 @@ def scan_folder_for_waste(folder_path):
                 if not is_safe_path(file_path, base_real_path):
                     results["summary"]["errorCount"] += 1
                     continue
+                
+                # PROGRESS: Update progress callback if provided
+                processed_count += 1
+                if processed_count % 10 == 0:  # Update every 10 files to minimize overhead
+                    percentage = round((processed_count / total_files) * 100, 1) if total_files > 0 else 0
+                    results["progress"]["processed"] = processed_count
+                    results["progress"]["percentage"] = percentage
+                    
+                    if progress_callback:
+                        try:
+                            progress_callback(processed_count, total_files, percentage)
+                        except Exception:
+                            pass  # Silently ignore callback errors
                 
                 # Error handling - continue on any file access issue
                 try:
@@ -380,6 +455,13 @@ def scan_folder_for_waste(folder_path):
                 except Exception:
                     results["summary"]["errorCount"] += 1
                     continue
+        
+        # Final progress update
+        results["progress"]["processed"] = processed_count
+        results["progress"]["percentage"] = 100.0
+        
+        # PROGRESS: Update stage to hashing
+        results["progress"]["stage"] = "hashing"
         
         # Second pass: Hash only files in same-size groups (potential duplicates)
         file_hashes = defaultdict(list)
@@ -446,11 +528,16 @@ def scan_folder_for_waste(folder_path):
         results["oldFiles"] = old_files[:100]
         results["systemFiles"] = system_files[:100]
         
+        # PROGRESS: Mark as complete
+        results["progress"]["stage"] = "complete"
+        results["progress"]["percentage"] = 100.0
+        
         return results
         
     except Exception as e:
         results["scanStatus"] = "error"
         results["error"] = f"Scan failed: {str(e)}"
+        results["progress"]["stage"] = "error"
         return results
 
 
