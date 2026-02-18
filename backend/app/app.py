@@ -19,7 +19,13 @@ import requests
 
 from app.modules.intelligent_usage.report import generate_intelligent_usage_report
 from app.storage_scanner import scan_folder
-from app.wasteDetect import scan_folder_for_waste, delete_duplicate_files
+from app.wasteDetect import (
+    scan_folder_for_waste, 
+    delete_duplicate_files,
+    get_recovery_files,
+    _clean_expired_recovery_files,
+    RECOVERY_RETENTION_DAYS
+)
 
 # Load API key
 API_KEY = os.getenv("ELECTRICITYMAP_API_KEY")
@@ -516,6 +522,87 @@ def delete_duplicates():
         
     except Exception as e:
         return jsonify({"detail": f"Error during deletion: {str(e)}", "status": "error"}), 500
+
+
+@app.route("/waste-detect/recovery", methods=['GET'])
+def get_recovery_list():
+    """
+    List all files currently in the recovery bin.
+    Includes metadata for each file: original path, timestamp, expiry date.
+    """
+    try:
+        recovery_files = get_recovery_files()
+        
+        # Calculate recovery bin statistics
+        active_files = [f for f in recovery_files if not f.get("is_expired", False)]
+        total_size = sum(f.get("file_size_bytes", 0) for f in active_files)
+        expired_files = [f for f in recovery_files if f.get("is_expired", False)]
+        
+        result = {
+            "status": "success",
+            "recoveryBin": {
+                "activeFiles": len(active_files),
+                "expiredFiles": len(expired_files),
+                "totalFiles": len(recovery_files),
+                "totalSizeBytes": total_size,
+                "totalSizeFormatted": _format_bytes(total_size) if total_size > 0 else "0 B",
+                "retentionDays": RECOVERY_RETENTION_DAYS
+            },
+            "files": recovery_files
+        }
+        
+        return jsonify(result)
+    
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "detail": f"Error retrieving recovery list: {str(e)}"
+        }), 500
+
+
+@app.route("/waste-detect/recovery/cleanup", methods=['POST'])
+def cleanup_recovery():
+    """
+    Clean up expired files from recovery bin.
+    Removes files that have exceeded retention period.
+    """
+    try:
+        cleaned_count = _clean_expired_recovery_files()
+        
+        recovery_files = get_recovery_files()
+        active_files = [f for f in recovery_files if not f.get("is_expired", False)]
+        total_size = sum(f.get("file_size_bytes", 0) for f in active_files)
+        
+        result = {
+            "status": "success",
+            "message": f"Cleaned up {cleaned_count} expired files from recovery bin",
+            "cleanedCount": cleaned_count,
+            "recoveryBin": {
+                "activeFiles": len(active_files),
+                "totalSizeBytes": total_size,
+                "totalSizeFormatted": _format_bytes(total_size) if total_size > 0 else "0 B",
+                "retentionDays": RECOVERY_RETENTION_DAYS
+            }
+        }
+        
+        return jsonify(result)
+    
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "detail": f"Error during cleanup: {str(e)}"
+        }), 500
+
+
+def _format_bytes(bytes_value):
+    """Helper to format bytes for API response."""
+    for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
+        if bytes_value < 1024.0:
+            if unit == 'B':
+                return f"{int(bytes_value)} {unit}"
+            return f"{bytes_value:.2f} {unit}"
+        bytes_value /= 1024.0
+    return f"{bytes_value:.2f} PB"
 
 
 @app.route("/select-folder")

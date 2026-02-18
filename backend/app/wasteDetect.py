@@ -1,13 +1,15 @@
 """
 Wasteful File Detector
 Identifies duplicate files via SHA256 hash, and detects unused/old files.
-Provides statistics and options for deletion.
+Provides statistics and options for deletion via safe recovery mechanism.
 Uses robust error handling similar to storage_scanner.py
 """
 
 import os
 import hashlib
 import time
+import json
+import shutil
 from datetime import datetime, timedelta
 from collections import defaultdict
 import mimetypes
@@ -25,6 +27,147 @@ SYSTEM_DIRECTORIES = {
     '.next', 'dist', 'build', '.env', 'node_modules', 'packages',
     'system volume information', 'recycler', 'backup', 'cache'
 }
+
+# RECOVERY CONFIGURATION
+# Safe deletion mechanism: files moved to recovery directory instead of permanent deletion
+RECOVERY_DIR = "backend/app/deleted_files_recovery"
+RECOVERY_METADATA_DIR = os.path.join(RECOVERY_DIR, ".metadata")
+RECOVERY_RETENTION_DAYS = 7  # Files automatically cleaned after 7 days
+
+
+def _ensure_recovery_dirs():
+    """Ensure recovery directories exist."""
+    try:
+        os.makedirs(RECOVERY_DIR, exist_ok=True)
+        os.makedirs(RECOVERY_METADATA_DIR, exist_ok=True)
+    except (IOError, OSError):
+        pass  # Best effort - directory might already exist or be inaccessible
+
+
+def _create_recovery_metadata(original_path, recovery_path):
+    """
+    Create metadata file for recovered file.
+    
+    Args:
+        original_path: Original file location
+        recovery_path: Path in recovery directory
+    
+    Returns:
+        Path to metadata JSON file
+    """
+    try:
+        _ensure_recovery_dirs()
+        
+        now = datetime.now()
+        expiry = now + timedelta(days=RECOVERY_RETENTION_DAYS)
+        
+        metadata = {
+            "original_path": original_path,
+            "recovery_path": recovery_path,
+            "recovered_at": now.isoformat(),
+            "expires_at": expiry.isoformat(),
+            "file_size_bytes": os.path.getsize(recovery_path) if os.path.exists(recovery_path) else 0
+        }
+        
+        # Create metadata filename from recovery path
+        basename = os.path.basename(recovery_path)
+        metadata_path = os.path.join(RECOVERY_METADATA_DIR, f"{basename}.json")
+        
+        with open(metadata_path, 'w') as f:
+            json.dump(metadata, f, indent=2)
+        
+        return metadata_path
+    except (IOError, OSError, json.JSONDecodeError) as e:
+        # Log but don't raise - recovery still happened
+        return None
+
+
+def _clean_expired_recovery_files():
+    """
+    Remove files from recovery bin that have expired.
+    Called automatically during deletion operations.
+    """
+    if not os.path.exists(RECOVERY_METADATA_DIR):
+        return 0
+    
+    cleaned_count = 0
+    now = datetime.now()
+    
+    try:
+        for metadata_file in os.listdir(RECOVERY_METADATA_DIR):
+            if not metadata_file.endswith('.json'):
+                continue
+            
+            metadata_path = os.path.join(RECOVERY_METADATA_DIR, metadata_file)
+            
+            try:
+                with open(metadata_path, 'r') as f:
+                    metadata = json.load(f)
+                
+                expiry = datetime.fromisoformat(metadata.get("expires_at", now.isoformat()))
+                
+                # If expired, remove both recovery file and metadata
+                if now > expiry:
+                    recovery_path = metadata.get("recovery_path")
+                    
+                    # Remove recovery file
+                    if recovery_path and os.path.exists(recovery_path):
+                        try:
+                            os.remove(recovery_path)
+                        except (IOError, OSError):
+                            pass
+                    
+                    # Remove metadata file
+                    try:
+                        os.remove(metadata_path)
+                    except (IOError, OSError):
+                        pass
+                    
+                    cleaned_count += 1
+            except (IOError, OSError, json.JSONDecodeError, ValueError):
+                # Skip problematic metadata files
+                continue
+    except (IOError, OSError):
+        pass  # Directory might be inaccessible
+    
+    return cleaned_count
+
+
+def get_recovery_files():
+    """
+    List all files currently in recovery.
+    
+    Returns:
+        List of recovery file metadata dictionaries
+    """
+    recovery_files = []
+    
+    if not os.path.exists(RECOVERY_METADATA_DIR):
+        return recovery_files
+    
+    try:
+        for metadata_file in sorted(os.listdir(RECOVERY_METADATA_DIR)):
+            if not metadata_file.endswith('.json'):
+                continue
+            
+            metadata_path = os.path.join(RECOVERY_METADATA_DIR, metadata_file)
+            
+            try:
+                with open(metadata_path, 'r') as f:
+                    metadata = json.load(f)
+                
+                # Add indicator if file is expired
+                now = datetime.now()
+                expiry = datetime.fromisoformat(metadata.get("expires_at", now.isoformat()))
+                metadata["is_expired"] = now > expiry
+                
+                recovery_files.append(metadata)
+            except (IOError, OSError, json.JSONDecodeError):
+                continue
+    except (IOError, OSError):
+        pass
+    
+    return recovery_files
 
 
 def is_safe_path(file_path, base_directory):
@@ -313,98 +456,119 @@ def scan_folder_for_waste(folder_path):
 
 def delete_duplicate_files(file_paths, keep_index=0):
     """
-    Delete specific duplicate files from the provided list.
-    Ensures files are actually deleted and verifies deletion.
+    Move duplicate files to recovery folder instead of permanent deletion.
+    
+    SAFETY: Files are preserved in recovery bin with metadata for 7 days.
+    This prevents accidental permanent loss of user data.
     
     SECURITY: Validates all paths before deletion to prevent unauthorized access
     
+    AUDITABILITY: Each recovery is logged with original path, timestamp, and expiry date
+    
     Args:
-        file_paths: List of file paths to delete (specific duplicates to remove)
+        file_paths: List of file paths to move to recovery
         keep_index: Deprecated parameter, kept for backward compatibility
     
     Returns:
-        Dictionary with deletion results and statistics
+        Dictionary with recovery results and statistics
     """
     results = {
         "status": "success",
-        "deletedCount": 0,
+        "recoveredCount": 0,
         "failedCount": 0,
-        "deletedSizeBytes": 0,
-        "deletions": []
+        "recoveredSizeBytes": 0,
+        "recoveredFiles": [],
+        "message": f"Files moved to recovery bin (expires in {RECOVERY_RETENTION_DAYS} days)"
     }
     
     if not file_paths:
         results["status"] = "warning"
-        results["message"] = "No files to delete"
+        results["message"] = "No files to recover"
         return results
     
-    # Delete each file and verify deletion
+    # Ensure recovery directories exist
+    _ensure_recovery_dirs()
+    
+    # Clean expired files before processing new ones
+    _clean_expired_recovery_files()
+    
+    # Move each file to recovery and track with metadata
     for file_path in file_paths:
         try:
-            # Verify file exists before deletion
+            # Verify file exists before recovery
             if not os.path.exists(file_path):
                 results["failedCount"] += 1
-                results["deletions"].append({
+                results["recoveredFiles"].append({
                     "path": file_path,
                     "status": "not_found",
                     "error": "File does not exist"
                 })
                 continue
             
-            # SECURITY: Validate path before deletion to prevent unauthorized removal
+            # SECURITY: Validate path before recovery to prevent unauthorized access
             if os.path.islink(file_path):
                 results["failedCount"] += 1
-                results["deletions"].append({
+                results["recoveredFiles"].append({
                     "path": file_path,
                     "status": "blocked",
-                    "error": "Symlinks cannot be deleted (security policy)"
+                    "error": "Symlinks cannot be recovered (security policy)"
                 })
                 continue
             
-            # Get file size before deletion
+            # Get file size before recovery
             try:
                 file_size = os.path.getsize(file_path)
             except (IOError, OSError):
                 file_size = 0
             
-            # Attempt deletion with multiple strategies
-            deletion_success = False
+            # Create unique recovery filename to avoid collisions
+            # Format: TIMESTAMP_ORIGINAL_FILENAME
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+            original_filename = os.path.basename(file_path)
+            recovery_filename = f"{timestamp}_{original_filename}"
+            recovery_path = os.path.join(RECOVERY_DIR, recovery_filename)
             
-            # Strategy 1: Direct deletion
+            # Ensure we don't overwrite existing recovery files
+            counter = 0
+            while os.path.exists(recovery_path) and counter < 100:
+                counter += 1
+                recovery_filename = f"{timestamp}_{counter}_{original_filename}"
+                recovery_path = os.path.join(RECOVERY_DIR, recovery_filename)
+            
+            # Move file to recovery
             try:
-                os.remove(file_path)
-                deletion_success = True
-            except (IOError, OSError, PermissionError) as e:
-                # Strategy 2: Try forcing deletion on Windows
-                if os.name == 'nt':
-                    try:
-                        import stat
-                        os.chmod(file_path, stat.S_IWRITE | stat.S_IREAD)
-                        os.remove(file_path)
-                        deletion_success = True
-                    except (IOError, OSError, Exception):
-                        deletion_success = False
+                shutil.move(file_path, recovery_path)
+                recovery_success = True
+            except (IOError, OSError, shutil.Error):
+                recovery_success = False
             
-            # Verify deletion was successful
-            if deletion_success and not os.path.exists(file_path):
-                results["deletedCount"] += 1
-                results["deletedSizeBytes"] += file_size
-                results["deletions"].append({
+            # Verify recovery was successful
+            if recovery_success and os.path.exists(recovery_path) and not os.path.exists(file_path):
+                # Create metadata file for auditability
+                metadata_path = _create_recovery_metadata(file_path, recovery_path)
+                
+                results["recoveredCount"] += 1
+                results["recoveredSizeBytes"] += file_size
+                results["recoveredFiles"].append({
                     "path": file_path,
-                    "status": "deleted",
-                    "sizeBytes": file_size
+                    "status": "recovered",
+                    "recoveredAs": recovery_filename,
+                    "sizeBytes": file_size,
+                    "sizeFormatted": format_bytes(file_size),
+                    "expiresAt": (datetime.now() + timedelta(days=RECOVERY_RETENTION_DAYS)).isoformat(),
+                    "metadataFile": os.path.basename(metadata_path) if metadata_path else None
                 })
             else:
                 results["failedCount"] += 1
-                results["deletions"].append({
+                results["recoveredFiles"].append({
                     "path": file_path,
                     "status": "failed",
-                    "error": "File still exists after deletion attempt"
+                    "error": "File could not be moved to recovery"
                 })
         
         except Exception as e:
             results["failedCount"] += 1
-            results["deletions"].append({
+            results["recoveredFiles"].append({
                 "path": file_path,
                 "status": "failed",
                 "error": str(e)
@@ -412,7 +576,19 @@ def delete_duplicate_files(file_paths, keep_index=0):
     
     # Set final status
     if results["failedCount"] > 0:
-        results["status"] = "partial_success" if results["deletedCount"] > 0 else "error"
+        results["status"] = "partial_success" if results["recoveredCount"] > 0 else "error"
+    
+    # Add recovery bin summary
+    all_recovery_files = get_recovery_files()
+    total_recovery_size = sum(f.get("file_size_bytes", 0) for f in all_recovery_files)
+    active_files = [f for f in all_recovery_files if not f.get("is_expired", False)]
+    
+    results["recoveryBin"] = {
+        "totalFiles": len(active_files),
+        "totalSizeBytes": total_recovery_size,
+        "totalSizeFormatted": format_bytes(total_recovery_size),
+        "retentionDays": RECOVERY_RETENTION_DAYS
+    }
     
     return results
 
