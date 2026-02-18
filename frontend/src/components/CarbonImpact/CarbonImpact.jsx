@@ -1,5 +1,6 @@
 ﻿import styles from './CarbonImpact.module.css';
 import InfoTooltip from '../InfoTooltip/InfoTooltip';
+import { getCarbonStory } from '../../utils/carbonStorytelling';
 
 /**
  * CarbonImpact - Displays CO2 emissions, energy consumption, and cost
@@ -30,10 +31,8 @@ export default function CarbonImpact({ result }) {
 
   console.log('CarbonImpact - Parsed values:', { carbonKg, energyKwh, costEstimate, storageTb, region, carbonIntensity });
 
-  // Calculate equivalent comparisons
-  const carEmissions = (carbonKg / 4.6).toFixed(1); // Average car emits 4.6 kg CO2/gallon
-  const treesNeeded = (carbonKg / 21).toFixed(1); // Average tree absorbs 21 kg CO2/year
-  const homeEquivalent = (energyKwh / 10500 * 100).toFixed(1); // Average US home uses 10,500 kWh/year
+  // Get comprehensive carbon storytelling data
+  const story = getCarbonStory(carbonKg, 'storage');
 
   return (
     <section className={styles.section} aria-labelledby="carbon-heading">
@@ -57,6 +56,11 @@ export default function CarbonImpact({ result }) {
         />
       </div>
 
+      {/* Contextual narrative message */}
+      <div className={styles.narrativeBox}>
+        <p className={styles.narrativeText}>{story.narrative}</p>
+      </div>
+
       <div className={styles.grid}>
         {/* CO2 Emissions Card */}
         <div className={styles.card}>
@@ -70,11 +74,16 @@ export default function CarbonImpact({ result }) {
           <div className={styles.comparisons}>
             <div className={styles.comparison}>
               <span className={styles.comparisonLabel}>Equivalent to:</span>
-              <span className={styles.comparisonValue}>{carEmissions} gallons of gas</span>
-            </div>
-            <div className={styles.comparison}>
-              <span className={styles.comparisonLabel}>Offset by:</span>
-              <span className={styles.comparisonValue}>{treesNeeded} trees/year</span>
+              <div className={styles.equivalenceGroup}>
+                <div className={styles.equivalenceItem}>
+                  <span className={styles.equivalenceValue}>{story.cars.distance}</span>
+                  <span className={styles.equivalenceNote}>{story.cars.description}</span>
+                </div>
+                <div className={styles.equivalenceItem}>
+                  <span className={styles.equivalenceValue}>{story.flight.distance}</span>
+                  <span className={styles.equivalenceNote}>round-trip flight</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -82,22 +91,23 @@ export default function CarbonImpact({ result }) {
         {/* Energy Consumption Card */}
         <div className={styles.card}>
           <div className={styles.cardHeader}>
-            <h3 className={styles.cardTitle}>Energy Consumption</h3>
-            <span className={styles.icon}>⚡</span>
+            <h3 className={styles.cardTitle}>Energy Offset</h3>
+            <span className={styles.icon}>🌱</span>
           </div>
-          <div className={styles.value}>{energyKwh.toLocaleString('en-US', { maximumFractionDigits: 1 })} kWh</div>
-          <div className={styles.subtext}>per year</div>
+          <div className={styles.value}>{story.trees.count}</div>
+          <div className={styles.subtext}>to offset annual emissions</div>
           
           <div className={styles.comparisons}>
+            <div className={styles.comparison}>
+              <span className={styles.comparisonLabel}>Impact:</span>
+              <span className={styles.comparisonValue}>{story.trees.description}</span>
+            </div>
             <div className={styles.comparison}>
               <span className={styles.comparisonLabel}>Storage size:</span>
               <span className={styles.comparisonValue}>{storageTb} TB</span>
             </div>
-            <div className={styles.comparison}>
-              <span className={styles.comparisonLabel}>Home equivalent:</span>
-              <span className={styles.comparisonValue}>{homeEquivalent}% of avg US home</span>
-            </div>
           </div>
+        </div>
         </div>
 
         {/* Cost Estimate Card */}
@@ -111,8 +121,8 @@ export default function CarbonImpact({ result }) {
           
           <div className={styles.comparisons}>
             <div className={styles.comparison}>
-              <span className={styles.comparisonLabel}>Cost per TB:</span>
-              <span className={styles.comparisonValue}>${(costEstimate / storageTb || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              <span className={styles.comparisonLabel}>Energy usage:</span>
+              <span className={styles.comparisonValue}>{energyKwh.toLocaleString('en-US', { maximumFractionDigits: 0 })} kWh/year</span>
             </div>
             <div className={styles.comparison}>
               <span className={styles.comparisonLabel}>Monthly cost:</span>

@@ -22,7 +22,7 @@
   border-left: 3px solid var(--color-primary);
   padding: var(--space-md);
   border-radius: var(--radius-md);
-  margin-bottom: var(--space-lg);
+  margin-bottom: var(--space-md);
   display: flex;
   align-items: center;
   gap: var(--space-sm);
@@ -46,6 +46,25 @@
 .separator {
   color: var(--color-border);
   margin: 0 var(--space-xs);
+}
+
+/* Narrative message box - contextual storytelling */
+.narrativeBox {
+  background: linear-gradient(135deg, rgba(74, 124, 89, 0.03) 0%, rgba(50, 100, 200, 0.03) 100%);
+  border: 1px solid rgba(74, 124, 89, 0.15);
+  border-left: 4px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.narrativeText {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text);
+  font-weight: 500;
+  letter-spacing: 0.3px;
 }
 
 .grid {
@@ -112,13 +131,15 @@
 .comparison {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   font-size: var(--text-sm);
+  gap: var(--space-sm);
 }
 
 .comparisonLabel {
   color: var(--color-text-secondary);
   font-weight: 500;
+  flex-shrink: 0;
 }
 
 .comparisonValue {
@@ -126,7 +147,32 @@
   font-weight: 600;
   text-align: right;
   flex-shrink: 0;
-  margin-left: var(--space-sm);
+}
+
+/* Equivalence group for multiple related comparisons */
+.equivalenceGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  flex: 1;
+}
+
+.equivalenceItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.equivalenceValue {
+  font-weight: 600;
+  color: var(--color-text);
+  font-size: var(--text-sm);
+}
+
+.equivalenceNote {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  font-style: italic;
 }
 
 .recommendations {
