@@ -108,7 +108,6 @@ export default function CarbonImpact({ result }) {
             </div>
           </div>
         </div>
-        </div>
 
         {/* Cost Estimate Card */}
         <div className={styles.card}>

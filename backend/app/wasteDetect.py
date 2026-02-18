@@ -14,25 +14,60 @@ from datetime import datetime, timedelta
 from collections import defaultdict
 import mimetypes
 
-SYSTEM_FILE_EXTENSIONS = {
-    '.dll', '.exe', '.sys', '.msi', '.app', '.so', '.o',
-    '.lock', '.tmp', '.temp', '.cache', '.log', '.bak',
-    '.db', '.sqlite', '.ini', '.cfg', '.conf', '.pdb',
-    '.ilk', '.obj', '.lib', '.a', '.so', '.dylib'
-}
+try:
+    # Try relative import (when used as part of app package)
+    from .core.config import Config
+except ImportError:
+    # Fall back to absolute import (when used directly or in tests)
+    try:
+        from app.core.config import Config
+    except ImportError:
+        # Last resort: define minimal config for backward compatibility
+        class Config:
+            class FileSystem:
+                HASH_CHUNK_SIZE = 65536
+                LARGE_FILE_THRESHOLD = 500 * 1024 * 1024
+                OLD_FILE_AGE_DAYS = 180
+                SECONDS_PER_DAY = 24 * 3600
+                OLD_FILE_AGE_SECONDS = OLD_FILE_AGE_DAYS * SECONDS_PER_DAY
+                PROGRESS_UPDATE_FREQUENCY = 10
+                MAX_RECOVERY_NAME_ATTEMPTS = 100
+                SYSTEM_FILE_EXTENSIONS = {
+                    '.dll', '.exe', '.sys', '.msi', '.app', '.so', '.o',
+                    '.lock', '.tmp', '.temp', '.cache', '.log', '.bak',
+                    '.db', '.sqlite', '.ini', '.cfg', '.conf', '.pdb',
+                    '.ilk', '.obj', '.lib', '.a', '.so', '.dylib'
+                }
+                SYSTEM_DIRECTORIES = {
+                    'windows', 'system32', 'system64', 'appdata', 'programfiles',
+                    'node_modules', '__pycache__', '.git', '.venv', 'venv',
+                    '.next', 'dist', 'build', '.env', 'node_modules', 'packages',
+                    'system volume information', 'recycler', 'backup', 'cache'
+                }
+            
+            class Recovery:
+                RETENTION_DAYS = 7
+                RECOVERY_DIR = "backend/app/deleted_files_recovery"
+                RECOVERY_METADATA_DIR = os.path.join(RECOVERY_DIR, ".metadata")
+            
+            class Storage:
+                BYTES_PER_KB = 1024
+                BYTES_PER_MB = 1024 * 1024
+                BYTES_PER_GB = 1024 * 1024 * 1024
+                BYTES_PER_TB = 1024 * 1024 * 1024 * 1024
+            
+            class Carbon:
+                CARBON_PER_GB_PER_YEAR = 0.2
+            
+            class Performance:
+                MAX_RESULTS_PER_CATEGORY = 100
 
-SYSTEM_DIRECTORIES = {
-    'windows', 'system32', 'system64', 'appdata', 'programfiles',
-    'node_modules', '__pycache__', '.git', '.venv', 'venv',
-    '.next', 'dist', 'build', '.env', 'node_modules', 'packages',
-    'system volume information', 'recycler', 'backup', 'cache'
-}
-
-# RECOVERY CONFIGURATION
-# Safe deletion mechanism: files moved to recovery directory instead of permanent deletion
-RECOVERY_DIR = "backend/app/deleted_files_recovery"
-RECOVERY_METADATA_DIR = os.path.join(RECOVERY_DIR, ".metadata")
-RECOVERY_RETENTION_DAYS = 7  # Files automatically cleaned after 7 days
+# Import constants from Config for backward compatibility and usage
+SYSTEM_FILE_EXTENSIONS = Config.FileSystem.SYSTEM_FILE_EXTENSIONS
+SYSTEM_DIRECTORIES = Config.FileSystem.SYSTEM_DIRECTORIES
+RECOVERY_DIR = Config.Recovery.RECOVERY_DIR
+RECOVERY_METADATA_DIR = Config.Recovery.RECOVERY_METADATA_DIR
+RECOVERY_RETENTION_DAYS = Config.Recovery.RETENTION_DAYS
 
 
 def _ensure_recovery_dirs():
@@ -225,11 +260,14 @@ def is_system_file(file_path):
     return False
 
 
-def get_file_hash(file_path, chunk_size=65536):
+def get_file_hash(file_path, chunk_size=None):
     """Calculate SHA256 hash of a file with error handling."""
+    if chunk_size is None:
+        chunk_size = Config.FileSystem.HASH_CHUNK_SIZE
+        
     try:
-        # Skip very large files for performance (> 500MB)
-        if os.path.getsize(file_path) > 500 * 1024 * 1024:
+        # Skip very large files for performance
+        if os.path.getsize(file_path) > Config.FileSystem.LARGE_FILE_THRESHOLD:
             return None
             
         sha256_hash = hashlib.sha256()
@@ -249,7 +287,7 @@ def get_file_age_days(file_path):
         mod_time = os.path.getmtime(file_path)
         current_time = time.time()
         age_seconds = current_time - mod_time
-        age_days = age_seconds / (24 * 3600)
+        age_days = age_seconds / Config.FileSystem.SECONDS_PER_DAY
         return age_days
     except (IOError, OSError):
         return 0
@@ -363,7 +401,7 @@ def scan_folder_for_waste(folder_path, progress_callback=None):
         results["progress"]["total"] = total_files
         
         current_time = time.time()
-        age_threshold_seconds = 180 * 24 * 3600  # 180 days
+        age_threshold_seconds = Config.FileSystem.OLD_FILE_AGE_SECONDS  # 180 days in seconds
         
         # First pass: Collect file metadata
         files_by_size = defaultdict(list)
@@ -394,7 +432,7 @@ def scan_folder_for_waste(folder_path, progress_callback=None):
                 
                 # PROGRESS: Update progress callback if provided
                 processed_count += 1
-                if processed_count % 10 == 0:  # Update every 10 files to minimize overhead
+                if processed_count % Config.FileSystem.PROGRESS_UPDATE_FREQUENCY == 0:  # Update every N files to minimize overhead
                     percentage = round((processed_count / total_files) * 100, 1) if total_files > 0 else 0
                     results["progress"]["processed"] = processed_count
                     results["progress"]["percentage"] = percentage
@@ -472,8 +510,8 @@ def scan_folder_for_waste(folder_path, progress_callback=None):
                 for file_info in file_list:
                     file_path = file_info["path"]
                     try:
-                        # Skip large files (> 500MB) for performance
-                        if file_size > 500 * 1024 * 1024:
+                        # Skip large files for performance
+                        if file_size > Config.FileSystem.LARGE_FILE_THRESHOLD:
                             continue
                             
                         file_hash = get_file_hash(file_path)
@@ -515,18 +553,18 @@ def scan_folder_for_waste(folder_path, progress_callback=None):
                          results["summary"]["totalSizeBytes"]) * 100
             results["statistics"]["wastePercentage"] = round(waste_pct, 2)
         
-        # Calculate carbon savings (0.02 kg CO2 per GB per year)
-        waste_gb = results["summary"]["potentialWasteSizeBytes"] / (1024 ** 3)
-        results["statistics"]["carbonSaveKgPerYear"] = round(waste_gb * 0.02, 4)
+        # Calculate carbon savings (kg CO2 per GB per year)
+        waste_gb = results["summary"]["potentialWasteSizeBytes"] / Config.Storage.BYTES_PER_GB
+        results["statistics"]["carbonSaveKgPerYear"] = round(waste_gb * Config.Carbon.CARBON_PER_GB_PER_YEAR, 4)
         
         # Sort results
         results["duplicateGroups"].sort(key=lambda x: x["totalWasteBytes"], reverse=True)
         old_files.sort(key=lambda x: x["size"], reverse=True)
         system_files.sort(key=lambda x: x["size"], reverse=True)
         
-        # Limit to top 100 for performance
-        results["oldFiles"] = old_files[:100]
-        results["systemFiles"] = system_files[:100]
+        # Limit to top results for performance
+        results["oldFiles"] = old_files[:Config.Performance.MAX_RESULTS_PER_CATEGORY]
+        results["systemFiles"] = system_files[:Config.Performance.MAX_RESULTS_PER_CATEGORY]
         
         # PROGRESS: Mark as complete
         results["progress"]["stage"] = "complete"
@@ -617,7 +655,7 @@ def delete_duplicate_files(file_paths, keep_index=0):
             
             # Ensure we don't overwrite existing recovery files
             counter = 0
-            while os.path.exists(recovery_path) and counter < 100:
+            while os.path.exists(recovery_path) and counter < Config.FileSystem.MAX_RECOVERY_NAME_ATTEMPTS:
                 counter += 1
                 recovery_filename = f"{timestamp}_{counter}_{original_filename}"
                 recovery_path = os.path.join(RECOVERY_DIR, recovery_filename)
@@ -683,9 +721,9 @@ def delete_duplicate_files(file_paths, keep_index=0):
 def format_bytes(bytes_value):
     """Format bytes to human-readable format."""
     for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
-        if bytes_value < 1024.0:
+        if bytes_value < Config.Storage.BYTES_PER_KB:
             if unit == 'B':
                 return f"{int(bytes_value)} {unit}"
             return f"{bytes_value:.2f} {unit}"
-        bytes_value /= 1024.0
+        bytes_value /= Config.Storage.BYTES_PER_KB
     return f"{bytes_value:.2f} PB"
