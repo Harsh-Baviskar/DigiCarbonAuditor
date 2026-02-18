@@ -5,7 +5,7 @@ const NAV_ITEMS = [
   { id: 'carbon-footprint', label: 'Carbon Footprint Estimator' },
   { id: 'wasteful-files', label: 'Wasteful Files Detector' },
   { id: 'segregator', label: 'Segregator' },
-  { id: 'google-drive', label: 'Upload Google Drive' },
+  // { id: 'google-drive', label: 'Upload Google Drive' },  // Phase 2 feature
 ];
 
 export default function Navigation({ activeSection, onSectionChange }) {

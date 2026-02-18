@@ -4,7 +4,6 @@ import Layout from './components/Layout/Layout';
 import CarbonFootprintPage from './components/CarbonFootprintPage/CarbonFootprintPage';
 import SegregatorPage from './components/SegregatorPage/SegregatorPage';
 import WastefulFilesPage from './components/WastefulFilesPage/WastefulFilesPage';
-import GoogleDrivePage from './components/GoogleDrivePage/GoogleDrivePage';
 import './App.css';
 
 /**
@@ -26,8 +25,6 @@ export default function App() {
         return <SegregatorPage />;
       case 'wasteful-files':
         return <WastefulFilesPage />;
-      case 'google-drive':
-        return <GoogleDrivePage />;
       default:
         return <CarbonFootprintPage />;
     }
