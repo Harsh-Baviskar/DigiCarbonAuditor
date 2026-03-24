@@ -1,0 +1,44 @@
+/* Horizontal trust badges - displayed as prominent tabs */
+.wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  padding: 0;
+  margin-bottom: 0;
+}
+
+/* Tab-like badge design - adapts to light or dark backgrounds */
+.badge {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--text-sm);
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(10px);
+  transition: all 150ms ease;
+}
+
+.badge:hover {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.label {
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.detail {
+  color: rgba(255, 255, 255, 0.88);
+  font-weight: 400;
+}
+
+@media (max-width: 640px) {
+  .badge {
+    font-size: var(--text-xs);
+    padding: var(--space-xs) var(--space-sm);
+  }
+}

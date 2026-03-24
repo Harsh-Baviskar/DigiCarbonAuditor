@@ -1,36 +1,56 @@
 /* Wasteful Files Page */
 
 .page {
-  padding: 2rem 0;
+  padding: 0;
 }
 
 .header {
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
   text-align: center;
+  padding: var(--space-xl) 0;
 }
 
 .title {
   color: var(--color-heading);
   font-size: 2rem;
   font-weight: 700;
-  margin: 0 0 0.75rem;
+  margin: 0 0 1rem;
+  letter-spacing: -0.02em;
 }
 
 .description {
-  color: var(--color-text-muted);
-  font-size: 1.05rem;
-  line-height: 1.6;
+  color: var(--color-text-secondary);
+  font-size: 1.1rem;
+  line-height: 1.7;
   margin: 0 auto;
-  max-width: 600px;
+  max-width: 700px;
+  font-weight: 400;
 }
 
 .results {
-  margin-top: 2rem;
+  margin-top: 2.5rem;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (max-width: 768px) {
   .page {
-    padding: 1.5rem 0;
+    padding: 0;
+  }
+
+  .header {
+    padding: var(--space-lg) 0;
+    margin-bottom: 2rem;
   }
 
   .title {
@@ -38,6 +58,6 @@
   }
 
   .description {
-    font-size: 0.95rem;
+    font-size: 1rem;
   }
 }

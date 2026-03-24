@@ -1,0 +1,43 @@
+/* Duplicate Detector Page */
+
+.page {
+  padding: 2rem 0;
+}
+
+.header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.title {
+  color: var(--color-heading);
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 0.75rem;
+}
+
+.description {
+  color: var(--color-text-muted);
+  font-size: 1.05rem;
+  line-height: 1.6;
+  margin: 0 auto;
+  max-width: 600px;
+}
+
+.results {
+  margin-top: 2rem;
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding: 1.5rem 0;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .description {
+    font-size: 0.95rem;
+  }
+}

@@ -1,0 +1,289 @@
+/* ==========================================================================
+   Digital Carbon Auditor - Design tokens
+   Sustainability-focused: natural greens, soft neutrals, clarity.
+   Use semantic tokens in components; edit palette here for global changes.
+   ========================================================================== */
+
+:root {
+  /* =========================================================================
+     REFINED COLOR PALETTE - Combining two sustainability-focused palettes
+     Fresh, calm, professional - guides attention without decoration
+     ========================================================================= */
+  
+  /* -------------------------------------------------------------------------
+     CORE PALETTE (raw values - single source of truth)
+     Thoughtfully selected from both palettes for clear role assignment
+     ------------------------------------------------------------------------- */
+  
+  /* Primary - Actions & CTAs */
+  --palette-primary: #437057;          /* Medium forest green - trustworthy, visible */
+  --palette-primary-dark: #2F5249;     /* Dark forest teal - hover states, emphasis */
+  --palette-primary-rgb: 67, 112, 87;
+  
+  /* Secondary - Supporting elements */
+  --palette-secondary: #5C8374;        /* Medium sage - surfaces, secondary actions */
+  --palette-secondary-light: #9EC8B9;  /* Light sage - soft backgrounds, borders */
+  --palette-secondary-rgb: 92, 131, 116;
+  
+  /* Accent - Highlights & Success */
+  --palette-accent: #97B067;           /* Lime sage - positive actions, growth */
+  --palette-accent-light: #b4c98a;     /* Tinted accent - subtle highlights */
+  --palette-accent-rgb: 151, 176, 103;
+  
+  /* Alert/Highlight - Use sparingly */
+  --palette-highlight: #E3DE61;        /* Soft yellow-green - important items only */
+  --palette-highlight-rgb: 227, 222, 97;
+  
+  /* Dark elements - Headers, footers, deep contrast */
+  --palette-deep: #4a6b33;             /* Dark teal - professional headers */
+  --palette-deep-darker: #092635;      /* Very dark teal - maximum contrast */
+  --palette-deep-rgb: 27, 66, 66;
+  
+  /* Text - High readability hierarchy */
+  --palette-text-primary: #2F5249;     /* Dark forest - headings, body text */
+  --palette-text-secondary: #437057;   /* Medium forest - secondary text */
+  --palette-text-muted: #5C8374;       /* Medium sage - hints, disabled */
+  --palette-text-rgb: 47, 82, 73;
+  
+  /* Neutral surfaces */
+  --palette-surface-light: #f0f7f4;    /* Very light sage - page background */
+  --palette-surface-soft: #e6f2ed;     /* Light sage tint - soft containers */
+  --palette-surface-sage: #d4e8df;     /* Sage tint - section separation */
+  --palette-paper: #ffffff;            /* Pure white - cards, elevated surfaces */
+  
+  /* Feedback - Errors and warnings */
+  --palette-error: #b91c1c;            /* Red - errors */
+  --palette-error-bg: #fef2f2;         /* Light red - error backgrounds */
+
+  /* -------------------------------------------------------------------------
+     SEMANTIC COLOR TOKENS (use these in components)
+     Applied consistently for clear visual hierarchy
+     ------------------------------------------------------------------------- */
+  
+  /* Actions & emphasis - Primary forest green for trust */
+  --color-primary: var(--palette-primary);
+  --color-primary-hover: var(--palette-primary-dark);
+  --color-action: var(--color-primary);
+  --color-action-hover: var(--color-primary-hover);
+  
+  /* Text hierarchy - Dark to muted for readability */
+  --color-heading: var(--palette-text-primary);
+  --color-text: var(--palette-text-primary);
+  --color-text-secondary: var(--palette-text-secondary);
+  --color-text-muted: var(--palette-text-muted);
+  
+  /* Accent & success - Fresh lime sage for positive actions */
+  --color-accent: var(--palette-accent);
+  --color-accent-hover: var(--palette-primary);
+  --color-success: var(--palette-accent);
+  --color-success-bg: rgba(var(--palette-accent-rgb), 0.12);
+  
+  /* Highlight - Soft yellow for important items (use sparingly) */
+  --color-highlight: var(--palette-highlight);
+  --color-highlight-bg: rgba(var(--palette-highlight-rgb), 0.15);
+  
+  /* Surfaces & grouping - Light sage for calm, clean backgrounds */
+  --color-surface: var(--palette-surface-sage);
+  --color-surface-soft: var(--palette-surface-soft);
+  --color-bg: var(--palette-surface-light);
+  --color-bg-soft: var(--palette-surface-soft);
+  --color-bg-elevated: var(--palette-paper);
+  
+  /* Secondary elements */
+  --color-secondary: var(--palette-secondary);
+  --color-secondary-light: var(--palette-secondary-light);
+  
+  /* Dark backgrounds - Professional header/footer */
+  --color-deep: var(--palette-deep);
+  --color-deep-darker: var(--palette-deep-darker);
+  
+  /* Borders - Subtle separation */
+  --color-border: rgba(var(--palette-text-rgb), 0.12);
+  --color-border-strong: rgba(var(--palette-text-rgb), 0.20);
+  
+  /* Feedback */
+  --color-error: var(--palette-error);
+  --color-error-bg: var(--palette-error-bg);
+
+  /* -------------------------------------------------------------------------
+     TYPOGRAPHY
+     ------------------------------------------------------------------------- */
+  --text-xs: 13px;
+  --text-sm: 14px;
+  --text-base: 18px;
+  --text-md: 18px;
+  --text-lg: 24px;
+  --text-xl: 30px;
+  --leading-tight: 1.35;
+  --leading-normal: 1.55;
+  --leading-relaxed: 1.65;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* -------------------------------------------------------------------------
+     SPACING
+     ------------------------------------------------------------------------- */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 20px;
+  --space-xl: 32px;
+
+  /* -------------------------------------------------------------------------
+     RADIUS & SHADOW
+     ------------------------------------------------------------------------- */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+  /* Theme transition */
+  --theme-transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* ==========================================================================
+   DARK MODE - Override semantic tokens
+   Deep but not pure black; muted accents; softer contrast
+   ========================================================================== */
+
+[data-theme="dark"] {
+  /* Text hierarchy - light text on dark backgrounds */
+  --color-heading: #e8f0ec;
+  --color-text: #d4ddd8;
+  --color-text-secondary: #a8bdb3;
+  --color-text-muted: #7a9589;
+  
+  /* Palette text overrides for dark mode */
+  --palette-text-primary: #e8f0ec;
+  --palette-text-secondary: #a8bdb3;
+  --palette-text-muted: #7a9589;
+  --palette-text-rgb: 232, 240, 236;
+  
+  /* Surfaces - neutral dark gray */
+  --color-bg: #1a1a1a;
+  --color-bg-soft: #212121;
+  --color-bg-elevated: #2a2a2a;
+  --color-surface: #313131;
+  --color-surface-soft: #272727;
+  
+  /* Palette surface overrides */
+  --palette-surface-light: #1a1a1a;
+  --palette-surface-soft: #212121;
+  --palette-surface-sage: #313131;
+  --palette-paper: #2a2a2a;
+  
+  /* Primary - slightly brighter for dark backgrounds */
+  --color-primary: #5a9971;
+  --color-primary-hover: #6bab82;
+  --color-action: #5a9971;
+  --color-action-hover: #6bab82;
+  
+  /* Accent - softer highlights */
+  --color-accent: #a8bf76;
+  --color-accent-hover: #5a9971;
+  --color-success: #a8bf76;
+  --color-success-bg: rgba(168, 191, 118, 0.12);
+
+  /* Highlight - toned down for dark */
+  --color-highlight: #d4cf5e;
+  --color-highlight-bg: rgba(212, 207, 94, 0.10);
+  
+  /* Secondary */
+  --color-secondary: #6e9985;
+  --color-secondary-light: #3d5e4f;
+  
+  /* Deep backgrounds */
+  --color-deep: #252525;
+  --color-deep-darker: #111111;
+  
+  /* Borders - lighter for visibility on dark */
+  --color-border: rgba(232, 240, 236, 0.12);
+  --color-border-strong: rgba(232, 240, 236, 0.22);
+  
+  /* Feedback - adjusted for dark */
+  --color-error: #f87171;
+  --color-error-bg: rgba(248, 113, 113, 0.12);
+  --palette-error: #f87171;
+  --palette-error-bg: rgba(248, 113, 113, 0.12);
+  
+  /* Shadows - more pronounced on dark */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.3);
+  
+  /* Navigation/header variables for dark theme */
+  --nav-bg: linear-gradient(135deg, #1a3022 0%, #0f2118 100%);
+  --nav-text: rgba(200, 220, 210, 0.85);
+  --nav-text-hover: #e8f0ec;
+  --nav-text-active: #e8f0ec;
+  --nav-hover-bg: rgba(200, 220, 210, 0.08);
+  --nav-active-bg: rgba(200, 220, 210, 0.12);
+  
+  /* On-dark section colors (WhyThisMatters, footer) */
+  --section-dark-bg: linear-gradient(135deg, #0f1a14 0%, #162019 50%, #1a2520 100%);
+  --section-dark-text: #d4ddd8;
+  --section-dark-heading: #e8f0ec;
+  --section-dark-item-bg: rgba(200, 220, 210, 0.05);
+  --section-dark-item-border: rgba(200, 220, 210, 0.1);
+  
+  /* Footer */
+  --footer-bg: #0a120d;
+  --footer-text: #a8bdb3;
+  
+  /* Button on-primary text */
+  --color-on-primary: #ffffff;
+  
+  /* Focus ring */
+  --color-focus-ring: rgba(90, 153, 113, 0.3);
+}
+
+/* Light mode explicit variables (for components that need them) */
+:root,
+[data-theme="light"] {
+  --nav-bg: linear-gradient(135deg, var(--palette-primary-dark) 0%, var(--palette-deep) 100%);
+  --nav-text: rgba(255, 255, 255, 0.85);
+  --nav-text-hover: #ffffff;
+  --nav-text-active: #ffffff;
+  --nav-hover-bg: rgba(255, 255, 255, 0.08);
+  --nav-active-bg: rgba(255, 255, 255, 0.12);
+  
+  --section-dark-bg: linear-gradient(rgb(31, 42, 53), rgb(34, 53, 66), rgb(15, 30, 39), rgb(52, 66, 29));
+  --section-dark-text: rgba(255, 255, 255, 0.85);
+  --section-dark-heading: #ffffff;
+  --section-dark-item-bg: rgba(255, 255, 255, 0.05);
+  --section-dark-item-border: rgba(255, 255, 255, 0.1);
+  
+  --footer-bg: rgb(11, 16, 19);
+  --footer-text: #ffffff;
+  
+  --color-on-primary: #ffffff;
+  --color-focus-ring: rgba(74, 124, 89, 0.15);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+  transition: var(--theme-transition);
+}
+
+/* Focus visible for accessibility - use primary for discoverability */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Smooth theme transitions for all themed elements */
+*,
+*::before,
+*::after {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}

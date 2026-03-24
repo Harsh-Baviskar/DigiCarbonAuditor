@@ -275,6 +275,67 @@ body {
   transition: var(--theme-transition);
 }
 
+/* Enhanced link styling for better visual hierarchy */
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--color-primary-hover);
+}
+
+/* Improve code/monospace styling */
+code, pre, .mono {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+/* Better heading hierarchy */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--color-heading);
+  line-height: var(--leading-tight);
+  margin-top: 0;
+  font-weight: 600;
+}
+
+h1 { font-size: var(--text-xl); margin-bottom: var(--space-md); }
+h2 { font-size: var(--text-lg); margin-bottom: var(--space-md); }
+h3 { font-size: var(--text-md); margin-bottom: var(--space-sm); }
+
+/* Better paragraph spacing */
+p {
+  margin: var(--space-sm) 0;
+}
+
+p:first-child {
+  margin-top: 0;
+}
+
+/* List styling improvements */
+ul, ol {
+  margin: var(--space-md) 0;
+  padding-left: var(--space-lg);
+}
+
+li {
+  margin-bottom: var(--space-xs);
+}
+
+/* Better button base styles */
+button {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+/* Enhanced input/form styling */
+input, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+}
+
 /* Focus visible for accessibility - use primary for discoverability */
 :focus-visible {
   outline: 2px solid var(--color-primary);

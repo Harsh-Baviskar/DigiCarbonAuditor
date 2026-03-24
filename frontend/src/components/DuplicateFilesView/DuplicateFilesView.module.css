@@ -2,8 +2,8 @@
   background: var(--color-bg-elevated);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  padding: var(--space-lg);
-  box-shadow: var(--shadow-sm);
+  padding: var(--space-lg) var(--space-xl);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .sectionHeader {
@@ -11,7 +11,7 @@
   justify-content: space-between;
   align-items: center;
   gap: var(--space-md);
-  margin-bottom: var(--space-md);
+  margin-bottom: var(--space-lg);
 }
 
 .heading {
@@ -19,24 +19,29 @@
   align-items: center;
   margin: 0;
   font-size: var(--text-md);
-  font-weight: 600;
+  font-weight: 700;
   line-height: var(--leading-tight);
   color: var(--color-heading);
+  gap: var(--space-md);
+  letter-spacing: -0.01em;
 }
 
 .toggleButton {
-  padding: var(--space-xs) var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
   font-size: var(--text-sm);
-  font-weight: 500;
+  font-weight: 700;
   color: var(--color-accent);
-  background: none;
-  border: none;
+  background: var(--color-bg-soft);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: color 0.15s ease;
+  transition: all 0.2s ease;
 }
 
 .toggleButton:hover {
   color: var(--color-accent-hover);
+  background: var(--color-surface-soft);
+  border-color: var(--color-accent);
 }
 
 .empty {
@@ -46,24 +51,30 @@
   font-size: var(--text-base);
   line-height: var(--leading-normal);
   color: var(--color-text-muted);
+  font-weight: 500;
 }
 
 .list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
+  gap: var(--space-lg);
 }
 
 .group {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.group:hover {
+  box-shadow: 0 2px 8px rgba(var(--palette-primary-rgb), 0.08);
 }
 
 /* Light surface for grouped rows; fresh, not dull */
 .groupHeader {
-  padding: var(--space-md);
-  background: var(--color-surface-soft);
+  padding: var(--space-lg);
+  background: linear-gradient(135deg, var(--color-surface-soft) 0%, var(--color-bg-soft) 100%);
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -71,7 +82,8 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-md);
+  gap: var(--space-lg);
+  font-weight: 500;
 }
 
 .hash {
@@ -80,24 +92,27 @@
   line-height: var(--leading-normal);
   color: var(--color-text-secondary);
   word-break: break-all;
+  font-weight: 500;
 }
 
 .size {
   font-size: var(--text-sm);
-  font-weight: 500;
-  color: var(--color-text);
+  font-weight: 700;
+  color: var(--color-primary);
   font-variant-numeric: tabular-nums;
 }
 
 .duplicateCount {
   font-size: var(--text-sm);
   color: var(--color-text-muted);
+  font-weight: 600;
 }
 
 .pathsContainer {
-  padding: var(--space-md);
+  padding: var(--space-lg);
   max-height: 200px;
   overflow-y: auto;
+  background: var(--color-bg-elevated);
 }
 
 .pathList {
@@ -107,7 +122,7 @@
 }
 
 .pathItem {
-  padding: var(--space-xs) 0;
+  padding: var(--space-md) 0;
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -122,23 +137,26 @@
   color: var(--color-text-secondary);
   word-break: break-all;
   display: block;
+  font-weight: 500;
 }
 
 /* Fresh green accent for expand - discoverable */
 .expandButton {
-  margin-top: var(--space-sm);
-  padding: var(--space-xs) 0;
+  margin-top: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
   font-size: var(--text-sm);
-  font-weight: 500;
+  font-weight: 700;
   color: var(--color-accent);
-  background: none;
-  border: none;
+  background: var(--color-bg-soft);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
   cursor: pointer;
-  text-align: left;
-  transition: color 0.15s ease;
+  text-align: center;
+  transition: all 0.2s ease;
 }
 
 .expandButton:hover {
   color: var(--color-accent-hover);
-  text-decoration: underline;
+  background: var(--color-surface-soft);
+  border-color: var(--color-accent);
 }

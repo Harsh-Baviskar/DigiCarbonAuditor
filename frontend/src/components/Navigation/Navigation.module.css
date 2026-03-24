@@ -3,7 +3,7 @@
 .navigation {
   background: var(--nav-bg);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -34,10 +34,10 @@
   font-family: inherit;
   font-size: 0.95rem;
   font-weight: 500;
-  padding: 1rem 1.5rem;
+  padding: 1.1rem 1.8rem;
   position: relative;
   white-space: nowrap;
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
   border-bottom: 3px solid transparent;
 }
 

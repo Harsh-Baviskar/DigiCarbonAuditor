@@ -1,0 +1,147 @@
+.header {
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.1) 100%);
+  pointer-events: none;
+}
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4);
+  position: relative;
+  z-index: 1;
+}
+
+@media (min-width: 768px) {
+  .container {
+    padding: var(--space-8) var(--space-6);
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    padding: var(--space-10) var(--space-8);
+  }
+}
+
+.topRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-8);
+  gap: var(--space-4);
+}
+
+.branding {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex: 1;
+}
+
+.logoWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, rgba(127, 176, 105, 0.2), rgba(74, 157, 101, 0.15));
+  border-radius: var(--radius-xl);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  transition: transform var(--transition-base), border-color var(--transition-base);
+}
+
+.logoWrapper:hover {
+  transform: scale(1.05);
+  border-color: rgba(127, 176, 105, 0.4);
+}
+
+.logo {
+  width: 32px;
+  height: 32px;
+  color: rgba(255, 255, 255, 0.95);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.brandContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.appName {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  margin: 0;
+  line-height: var(--leading-tight);
+}
+
+@media (min-width: 640px) {
+  .appName {
+    font-size: var(--text-3xl);
+  }
+}
+
+@media (min-width: 1024px) {
+  .appName {
+    font-size: var(--text-4xl);
+  }
+}
+
+.tagline {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: rgba(255, 255, 255, 0.75);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+@media (min-width: 640px) {
+  .tagline {
+    font-size: var(--text-base);
+  }
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* Mobile responsive */
+@media (max-width: 640px) {
+  .logoWrapper {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .logo {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .branding {
+    gap: var(--space-3);
+  }
+}

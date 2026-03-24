@@ -2,10 +2,10 @@
 .section {
     width: 100%;
     margin-top: var(--space-xl);
-    padding: var(--space-lg);
+    padding: var(--space-lg) var(--space-xl);
     background: var(--color-bg-elevated);
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     border: 1px solid var(--color-border);
     animation: fadeInUp 0.6s ease-out;
 }
@@ -14,18 +14,19 @@
 .header {
     display: flex;
     align-items: center;
-    gap: var(--space-sm);
+    gap: var(--space-md);
     margin-bottom: var(--space-lg);
     border-bottom: 2px solid var(--color-border);
-    padding-bottom: var(--space-md);
+    padding-bottom: var(--space-lg);
 }
 
 .heading {
     font-size: var(--text-md);
-    font-weight: 600;
+    font-weight: 700;
     color: var(--color-heading);
     line-height: var(--leading-tight);
     margin: 0;
+    letter-spacing: -0.01em;
 }
 
 .icon {
@@ -49,12 +50,12 @@
 }
 
 .metricCard {
-    background: var(--color-surface-soft);
-    border: 1px solid var(--color-border);
+    background: linear-gradient(135deg, var(--color-surface-soft) 0%, var(--color-bg-soft) 100%);
+    border: 1.5px solid var(--color-border);
     border-radius: var(--radius-md);
-    padding: var(--space-md);
+    padding: var(--space-lg);
     text-align: center;
-    transition: border-color 0.15s ease, background 0.15s ease;
+    transition: all 0.25s ease;
     animation: fadeInUp 0.5s ease-out forwards;
     opacity: 0;
 }
@@ -72,30 +73,36 @@
 }
 
 .metricCard:hover {
-    border-color: var(--color-surface);
-    background: var(--color-surface);
+    border-color: var(--color-primary);
+    background: linear-gradient(135deg, var(--color-surface) 0%, var(--color-surface-soft) 100%);
+    box-shadow: 0 4px 12px rgba(var(--palette-primary-rgb), 0.1);
+    transform: translateY(-2px);
 }
 
 .metricLabel {
-    font-size: var(--text-sm);
-    color: var(--color-text-secondary);
-    margin-bottom: var(--space-xs);
-    font-weight: 500;
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-md);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .metricValue {
-    font-size: var(--text-lg);
-    font-weight: 600;
+    font-size: 1.75rem;
+    font-weight: 700;
     color: var(--color-primary);
     margin: 0;
     line-height: var(--leading-tight);
     font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
 }
 
 .metricSub {
     font-size: var(--text-xs);
     color: var(--color-text-muted);
-    margin-top: var(--space-xs);
+    margin-top: var(--space-sm);
+    font-weight: 500;
 }
 
 
@@ -120,30 +127,33 @@
 
 /* Cold Data Circular Chart Card */
 .chartCard {
-    background: var(--color-surface-soft);
-    border: 1px solid var(--color-border);
+    background: linear-gradient(135deg, var(--color-surface-soft) 0%, var(--color-bg-soft) 100%);
+    border: 1.5px solid var(--color-border);
     border-radius: var(--radius-md);
     padding: var(--space-lg);
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    transition: border-color 0.15s ease, background 0.15s ease;
+    transition: all 0.25s ease;
 }
 
 .chartCard:hover {
-    border-color: var(--color-surface);
-    background: var(--color-surface);
+    border-color: var(--color-primary);
+    background: linear-gradient(135deg, var(--color-surface) 0%, var(--color-surface-soft) 100%);
+    box-shadow: 0 4px 12px rgba(var(--palette-primary-rgb), 0.1);
+    transform: translateY(-2px);
 }
 
 .chartTitle {
     font-size: var(--text-sm);
-    font-weight: 500;
-    color: var(--color-text-secondary);
-    margin: 0 0 var(--space-md);
+    font-weight: 700;
+    color: var(--color-heading);
+    margin: 0 0 var(--space-lg);
     width: 100%;
-    text-align: left;
+    text-align: center;
     line-height: var(--leading-tight);
+    letter-spacing: -0.005em;
 }
 
 /* Circular Chart CSS */
@@ -153,11 +163,11 @@
     position: relative;
     border-radius: 50%;
     background: conic-gradient(var(--color-highlight) var(--degrees),
-            var(--color-surface) 0deg);
+            var(--color-border) 0deg);
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: var(--space-md);
+    margin-bottom: var(--space-lg);
     transition: --degrees 1s ease-out;
 }
 
@@ -173,9 +183,10 @@
 }
 
 .percentValue {
-    font-size: var(--text-xl);
+    font-size: var(--text-lg);
     font-weight: 700;
     color: var(--color-primary);
+    letter-spacing: -0.02em;
 }
 
 /* Efficiency Gauge (Semi-Circle) */
@@ -183,17 +194,17 @@
     width: 160px;
     height: 80px;
     /* Half height */
-    background: var(--color-surface);
+    background: var(--color-border);
     border-radius: 100px 100px 0 0;
     position: relative;
-    margin-bottom: var(--space-md);
+    margin-bottom: var(--space-lg);
     overflow: hidden;
 }
 
 .gaugeFill {
     width: 100%;
     height: 100%;
-    background: var(--color-primary);
+    background: linear-gradient(90deg, var(--color-accent), var(--color-primary));
     transform-origin: bottom center;
     transition: transform 1s ease-out;
     transform: rotate(0deg);
@@ -215,8 +226,8 @@
 }
 
 .efficiencyValue {
-    font-size: var(--text-lg);
-    font-weight: 600;
+    font-size: 1.25rem;
+    font-weight: 700;
     color: var(--color-primary);
     line-height: 1;
     font-variant-numeric: tabular-nums;
@@ -225,29 +236,33 @@
 .percentLabel {
     font-size: var(--text-xs);
     color: var(--color-text-muted);
+    font-weight: 500;
 }
 
 .statDetail {
     display: flex;
     justify-content: center;
     width: 100%;
-    margin-top: var(--space-xs);
+    margin-top: var(--space-md);
     font-size: var(--text-sm);
     color: var(--color-text-secondary);
+    font-weight: 500;
 }
 
 /* Category Bars */
 .categoryCard {
-    background: var(--color-surface-soft);
-    border: 1px solid var(--color-border);
+    background: linear-gradient(135deg, var(--color-surface-soft) 0%, var(--color-bg-soft) 100%);
+    border: 1.5px solid var(--color-border);
     border-radius: var(--radius-md);
     padding: var(--space-lg);
-    transition: border-color 0.15s ease, background 0.15s ease;
+    transition: all 0.25s ease;
 }
 
 .categoryCard:hover {
-    border-color: var(--color-surface);
-    background: var(--color-surface);
+    border-color: var(--color-primary);
+    background: linear-gradient(135deg, var(--color-surface) 0%, var(--color-surface-soft) 100%);
+    box-shadow: 0 4px 12px rgba(var(--palette-primary-rgb), 0.1);
+    transform: translateY(-2px);
 }
 
 .categoryList {
@@ -257,29 +272,30 @@
 }
 
 .categoryItem {
-    margin-bottom: var(--space-md);
+    margin-bottom: var(--space-lg);
 }
 
 .categoryHeader {
     display: flex;
     justify-content: space-between;
     font-size: var(--text-sm);
-    margin-bottom: var(--space-xs);
-    color: var(--color-text);
+    margin-bottom: var(--space-md);
+    color: var(--color-heading);
+    font-weight: 700;
 }
 
 .progressBarTrack {
     width: 100%;
     height: 6px;
     background: var(--color-border);
-    border-radius: var(--radius-sm);
+    border-radius: 3px;
     overflow: hidden;
 }
 
 .progressBarFill {
     height: 100%;
-    background: var(--color-accent);
-    border-radius: var(--radius-sm);
+    background: linear-gradient(90deg, var(--color-accent), var(--color-primary));
+    border-radius: 3px;
     width: 0;
     transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -287,25 +303,27 @@
 /* Recommendations */
 .recommendationsTitle {
     font-size: var(--text-sm);
-    font-weight: 500;
-    color: var(--color-text-secondary);
-    margin: 0 0 var(--space-md);
+    font-weight: 700;
+    color: var(--color-heading);
+    margin: 0 0 var(--space-lg);
     line-height: var(--leading-tight);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .recGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: var(--space-md);
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: var(--space-lg);
 }
 
 .recCard {
-    background: var(--color-surface-soft);
-    border: 1px solid var(--color-border);
+    background: linear-gradient(135deg, var(--color-surface-soft) 0%, var(--color-bg-soft) 100%);
+    border: 1.5px solid var(--color-border);
     border-left: 4px solid var(--color-accent);
     border-radius: var(--radius-md);
-    padding: var(--space-md);
-    transition: border-color 0.15s ease, background 0.15s ease;
+    padding: var(--space-lg);
+    transition: all 0.25s ease;
     opacity: 0;
     animation: fadeInUp 0.5s ease-out forwards;
     display: flex;
@@ -320,9 +338,10 @@
 }
 
 .recList li {
-    margin-bottom: var(--space-xs);
+    margin-bottom: var(--space-sm);
     font-size: var(--text-sm);
     line-height: var(--leading-normal);
+    font-weight: 500;
 }
 
 /* Stagger animations for rec cards */
@@ -347,8 +366,10 @@
 }
 
 .recCard:hover {
-    border-color: var(--color-surface);
-    background: var(--color-surface);
+    border-color: var(--color-primary);
+    background: linear-gradient(135deg, var(--color-surface) 0%, var(--color-surface-soft) 100%);
+    box-shadow: 0 4px 12px rgba(var(--palette-primary-rgb), 0.1);
+    transform: translateY(-2px);
 }
 
 .recText {
@@ -356,7 +377,7 @@
     font-size: var(--text-sm);
     color: var(--color-text-secondary);
     line-height: var(--leading-normal);
-    font-weight: 500;
+    font-weight: 600;
 }
 
 /* Loading/Empty States */
@@ -365,6 +386,7 @@
     padding: var(--space-xl);
     color: var(--color-text-muted);
     font-style: italic;
+    font-weight: 500;
 }
 
 /* Animations */

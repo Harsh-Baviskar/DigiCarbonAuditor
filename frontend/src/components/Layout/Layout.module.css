@@ -80,6 +80,7 @@
   background: var(--footer-bg);
   border-top: 1px solid var(--color-border);
   padding: var(--space-lg) 0;
+  margin-top: auto;
 }
 
 .footerText {
@@ -92,9 +93,7 @@
 
 /* Mobile adjustments */
 @media (max-width: 768px) {
-  .contentWrapper,
-  .whySection,
-  .footer {
+  .contentWrapper {
     padding: var(--space-md) 0;
   }
 
@@ -104,5 +103,9 @@
 
   .whyImage {
     min-height: 200px;
+  }
+  
+  .whyText {
+    padding: var(--space-md) var(--space-md);
   }
 }
