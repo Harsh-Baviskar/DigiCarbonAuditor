@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { formatBytes } from '../../utils/formatters';
+import { API_BASE_URL } from '../../api/api';
 import InfoTooltip from '../InfoTooltip/InfoTooltip';
 import styles from './WastefulFilesStatistics.module.css';
 
@@ -166,7 +167,7 @@ export default function WastefulFilesStatistics({ scanData }) {
 
   const handleDeleteDuplicates = async (filesToDelete, allPaths) => {
     try {
-      const response = await fetch('/waste-detect/delete-duplicates', {
+      const response = await fetch(`${API_BASE_URL}/waste-detect/delete-duplicates`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 

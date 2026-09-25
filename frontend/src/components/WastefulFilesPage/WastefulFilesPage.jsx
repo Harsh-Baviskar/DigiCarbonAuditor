@@ -5,6 +5,7 @@ import ScanInputSection from '../ScanInputSection/ScanInputSection';
 import StatusFeedback from '../StatusFeedback/StatusFeedback';
 import WastefulFilesStatistics from '../WastefulFilesStatistics/WastefulFilesStatistics';
 import SuggestedActions from '../SuggestedActions/SuggestedActions';
+import { API_BASE_URL } from '../../api/api';
 
 function getCurrentStep(isScanning, scanData) {
   if (scanData) return 3;
@@ -32,8 +33,7 @@ export default function WastefulFilesPage() {
 
       console.log('Starting waste detection scan for:', path);
 
-      // Call the waste-detect endpoint via vite proxy
-      const response = await fetch('/waste-detect', {
+      const response = await fetch(`${API_BASE_URL}/waste-detect`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ path: path.trim() })

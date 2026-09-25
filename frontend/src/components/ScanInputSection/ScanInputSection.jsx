@@ -1,6 +1,7 @@
 ﻿import { useState, useEffect } from 'react';
 import styles from './ScanInputSection.module.css';
 import { getCarbonIntensity } from '../../api/api';
+import { API_BASE_URL } from '../../api/api';
 
 /**
  * ScanInputSection - Intuitive folder selection for non-technical users.
@@ -79,7 +80,7 @@ export default function ScanInputSection({ onScan, isScanning }) {
     setPathError(null);
 
     try {
-      const response = await fetch('/select-folder');
+      const response = await fetch(`${API_BASE_URL}/select-folder`);
       const data = await response.json();
 
       if (data.path && data.path.trim().length > 0) {

@@ -1,3 +1,5 @@
+import { API_BASE_URL } from './api';
+
 /**
  * Intelligent Usage API (Real Backend)
  * Fetches file categorization + cold data report from Flask backend.
@@ -14,7 +16,7 @@ export async function fetchIntelligentUsage(path, fileCount = null) {
     }
 
     const response = await fetch(
-        `/api/intelligent-usage?${params.toString()}`
+        `${API_BASE_URL}/intelligent-usage?${params.toString()}`
     );
 
     const data = await response.json();
